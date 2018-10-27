@@ -1,0 +1,6 @@
+G: 1 # Number of games played
+P: 1 # Starting player
+K: 4 # Maximum number of stones possible to pick each round
+N: 14 # Starting number of stones
+M: 10000 # Number of simulations
+verbose: True
