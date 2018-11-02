@@ -8,6 +8,5 @@ class GameSetting:
         self.G = config["G"]
         self.P = config["P"]
         self.M = config["M"]
-        self.N = config["N"]
-        self.K = config["K"]
         self.verbose = config["verbose"]
+        self.size = config["size"]

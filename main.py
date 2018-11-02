@@ -1,77 +1,91 @@
 from Node import *
-from NimState import *
+from HexState import *
 from GameSetting import *
+from Board import *
 
-def UCT(rootstate, itermax, verbose=False):
-    """ Conduct a UCT search for itermax iterations starting from rootstate.
-        Return the best move from the rootstate.
-        Assumes 2 alternating players (player 1 starts), with game results in the range [0.0, 1.0]."""
-
+def tree_search(rootstate, itermax, verbose=False):
     rootnode = Node(state=rootstate)
 
     for i in range(itermax):
         node = rootnode
-        state = rootstate.Clone()
+        state = rootstate.clone()
 
-        # Select
-        while node.untriedMoves == [] and node.childNodes != []:  # node is fully expanded and non-terminal
-            node = node.UCTSelectChild()
-            state.DoMove(node.move)
+        """
+        Selection: start from root R and select successive child nodes until a leaf node L is reached. The root is the 
+        current game state and a leaf is any node from which no simulation (playout) has yet been initiated. The 
+        section below says more about a way of biasing choice of child nodes that lets the game tree expand towards the 
+        most promising moves, which is the essence of Monte Carlo tree search.
 
-        # Expand
-        if node.untriedMoves != []:  # if we can expand (i.e. state/node is non-terminal)
-            m = random.choice(node.untriedMoves)
-            state.DoMove(m)
-            node = node.add_child(m, state)  # add child and descend tree
+        Expansion: unless L ends the game decisively (e.g. win/loss/draw) for either player, create one (or more) child 
+        nodes and choose node C from one of them. Child nodes are any valid moves from the game position defined by L.
 
-        # Rollout - this can often be made orders of magnitude quicker using a state.GetRandomMove() function
-        while state.get_moves() != []:  # while state is non-terminal
-            state.DoMove(random.choice(state.get_moves()))
+        Simulation: complete one random playout from node C. This step is sometimes also called playout or rollout. A 
+        playout may be as simple as choosing uniform random moves until the game is decided (for example in chess, the 
+        game is won, lost, or drawn).
 
-        # Backpropagate
-        while node != None:  # backpropagate from the expanded node and work back to the root node
-            node.Update(state.GetResult(
-                node.playerJustMoved))  # state is terminal. Update node with result from POV of node.playerJustMoved
+        Backpropagation: use the result of the playout to update information in the nodes on the path from C to R.
+
+        -Wikipedia
+        """
+
+        # Selection
+        while node.untried_moves == [] and node.childNodes != []:
+            node = node.select_child()
+            state.do_move(node.move)
+
+        # Expansion
+        if node.untried_moves != []:
+            moves = random.choice(node.untried_moves)
+            state.do_move(moves)
+            node = node.add_child(moves, state)
+
+        # Simulation
+        while state.get_moves() != []:
+            state.do_move(random.choice(state.get_moves()))
+
+        # Backpropagation
+        while node != None:
+            node.update(state.get_result(node.player_just_moved))
             node = node.parentNode
 
-    # Output some information about the tree - can be omitted
-    # Noe dritt man egentlig ikke trenger
     if game_setting.verbose == True:
-        print(rootnode.ChildrenToString())
-    return sorted(rootnode.childNodes, key=lambda c: c.visits)[-1].move  # return the move that was most visited
+        print(rootnode.children_to_string())
+    return max(rootnode.childNodes, key=lambda c: c.visits).move
 
 
-def PlayGame(game_setting):
-    """ Play a sample game between two UCT players where each player gets a different number
-        of UCT iterations (= simulations = tree nodes).
+def play_game(game_setting):
     """
-    player_wins = [0,0]
+    Spiller et enkelt spill mellom to spillere
+    """
+    player_wins = [0, 0]
     for i in range(game_setting.G):
-        state = NimState(game_setting,game_setting.N)  # uncomment to play Nim with the given number of starting stones
+        state = NimState(game_setting, game_setting.N)
         while (state.get_moves() != []):
-            if state.playerJustMoved == 1:
-                m = UCT(rootstate = state, itermax = game_setting.M, verbose = game_setting.verbose)  # play with values for itermax and verbose = True
-            else:
-                m = UCT(rootstate = state, itermax = game_setting.M, verbose = game_setting.verbose)
-            #print("Best Move: " + str(m) + "\n")
-            state.DoMove(m)
+            move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose)
+            state.do_move(move)
             if game_setting.verbose == True:
-                if m == 1:
-                    print("Player " + str(state.playerJustMoved) + " selects " + str(m) + " stone. " + "Stones remaining = " + str(state.stones_remaining))
+                if move == 1:
+                    print("Player " + str(state.player_just_moved) + " selects " + str(
+                        move) + " stone. " + "Stones remaining = " + str(state.stones_remaining))
                 else:
-                    print("Player " + str(state.playerJustMoved) + " selects " + str(m) + " stones. " + "Stones remaining = " + str(
+                    print("Player " + str(state.player_just_moved) + " selects " + str(
+                        move) + " stones. " + "Stones remaining = " + str(
                         state.stones_remaining))
 
         if game_setting.verbose == True:
-            if state.GetResult(state.playerJustMoved) == 1.0:
-                print("Player " + str(state.playerJustMoved) + " wins" + "\n")
-            elif state.GetResult(state.playerJustMoved) == 0.0:
-                print("Player " + str(3 - state.playerJustMoved) + " wins" + "\n")
+            if state.get_result(state.player_just_moved) == 1.0:
+                print("Player " + str(state.player_just_moved) + " wins" + "\n")
+            elif state.get_result(state.player_just_moved) == 0.0:
+                print("Player " + str(3 - state.player_just_moved) + " wins" + "\n")
 
-        player_wins[state.playerJustMoved - 1] += 1
-
+        player_wins[state.player_just_moved - 1] += 1
 
     print(player_wins)
 
+
+#game_setting = GameSetting()
+#play_game(game_setting)
+
 game_setting = GameSetting()
-PlayGame(game_setting)
+state = HexState(game_setting)
+print(state)
