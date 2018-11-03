@@ -2,4 +2,4 @@ G: 1 # Number of games played
 P: 1 # Starting player
 M: 10 # Number of simulations
 verbose: True
-size: 4 # Length of each side
+size: 3 # Length of each side

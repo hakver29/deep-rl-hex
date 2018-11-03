@@ -1,8 +1,13 @@
 import numpy as np
+from unionfind import *
 
 class HexState:
     # Representerer en tilstand av Nim. NimState tar inn spillets regler og antall steiner som er gjenværende.
     PLAYERS = {"none": 0, "white": 1, "black": 2}
+    EDGE1 = 1
+    EDGE2 = 2
+    GAMEOVER = -1
+    neighbor_patterns = ((-1, 0), (0, -1), (-1, 1), (0, 1), (1, 0), (1, -1))
 
 
     def __init__(self, game_setting):
@@ -11,6 +16,58 @@ class HexState:
         self.board = np.zeros((game_setting.size,game_setting.size))
         self.game_setting = game_setting
         self.toplay = self.PLAYERS["white"]
+
+        self.white_groups = unionfind()
+        self.black_groups = unionfind()
+
+    def play(self, cell):
+        """
+        Play a stone of the current turns color in the passed cell.
+        """
+        if (self.toplay == self.PLAYERS["white"]):
+            self.place_white(cell)
+            self.toplay = self.PLAYERS["black"]
+        elif (self.toplay == self.PLAYERS["black"]):
+            self.place_black(cell)
+            self.toplay = self.PLAYERS["white"]
+
+    def place_white(self, cell):
+        """
+        Place a white stone regardless of whose turn it is.
+        """
+        if (self.board[cell] == self.PLAYERS["none"]):
+            self.board[cell] = self.PLAYERS["white"]
+        else:
+            raise ValueError("Cell occupied")
+        # if the placed cell touches a white edge connect it appropriately
+        if (cell[0] == 0):
+            self.white_groups.join(self.EDGE1, cell)
+        if (cell[0] == self.size - 1):
+            self.white_groups.join(self.EDGE2, cell)
+        # join any groups connected by the new white stone
+        for n in self.neighbors(cell):
+            if (self.board[n] == self.PLAYERS["white"]):
+                self.white_groups.join(n, cell)
+
+    def place_black(self, cell):
+        """
+        Place a black stone regardless of whose turn it is.
+        """
+        if (self.board[cell] == self.PLAYERS["none"]):
+            self.board[cell] = self.PLAYERS["black"]
+        else:
+            raise ValueError("Cell occupied")
+        # if the placed cell touches a black edge connect it appropriately
+        if (cell[1] == 0):
+            self.black_groups.join(self.EDGE1, cell)
+        if (cell[1] == self.size - 1):
+            self.black_groups.join(self.EDGE2, cell)
+        # join any groups connected by the new black stone
+        for n in self.neighbors(cell):
+            if (self.board[n] == self.PLAYERS["black"]):
+                self.black_groups.join(n, cell)
+
+
 
 
     def clone(self):
@@ -40,7 +97,7 @@ class HexState:
                     moves.append((x, y))
         return moves
 
-    def neigbors(self, cell):
+    def neighbors(self, cell):
         x = cell[0]
         y = cell[1]
         return [(n[0] + x, n[1] + y) for n in self.neighbor_patterns \

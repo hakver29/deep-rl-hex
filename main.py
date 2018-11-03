@@ -88,4 +88,6 @@ def play_game(game_setting):
 
 game_setting = GameSetting()
 state = HexState(game_setting)
+state.place_black((0,0))
+state.place_white((0,1))
 print(state)
