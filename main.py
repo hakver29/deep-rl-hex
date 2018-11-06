@@ -57,10 +57,10 @@ def play_game(game_setting):
     """
     Spiller et enkelt spill mellom to spillere
     """
-    player_wins = [0, 0]
+    player_wins = [0,0]
     for i in range(game_setting.G):
         state = HexState(game_setting)
-        while (state.get_moves() != []):
+        while (state.white.connected(1,2) == False and state.black.connected(1,2) == False):
             move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose)
             state.do_move(move)
             if game_setting.verbose == True:
@@ -78,6 +78,7 @@ def play_game(game_setting):
                 print("Player " + str(3 - state.player_just_moved) + " wins" + "\n")
 
         player_wins[state.player_just_moved - 1] += 1
+        print(state)
 
     print(player_wins)
 
@@ -100,3 +101,6 @@ print(state)
 print(state.white.connected(state.EDGE1,state.EDGE2))
 print(state.black.connected(state.EDGE1,state.EDGE2))
 """
+
+"WHITE: 1"
+"BLACK: 2"

@@ -24,67 +24,51 @@ class HexState:
         Play a stone of the current turns color in the passed cell.
         """
         if (self.toplay == self.PLAYERS["white"]):
-            self.place_white(cell)
-            self.toplay = self.PLAYERS["black"]
+            self.do_move(cell)
+            #self.toplay = self.PLAYERS["black"]
+            self.player_just_moved = 3 - self.player_just_moved
         elif (self.toplay == self.PLAYERS["black"]):
-            self.place_black(cell)
-            self.toplay = self.PLAYERS["white"]
+            self.do_move(cell)
+            #self.toplay = self.PLAYERS["white"]
+            self.player_just_moved = 3 - self.player_just_moved
 
-    def do_move(self, cell, player_just_moved):
-        """
-        Place a white stone regardless of whose turn it is.
-        """
-        if (self.board[cell] == self.PLAYERS["none"]):
-            self.board[cell] = self.PLAYERS[player_just_moved]
-        else:
-            raise ValueError("Cell occupied")
-        # if the placed cell touches a white edge connect it appropriately
-        if (cell[0] == 0):
-            self.groups.join(self.EDGE1, cell)
-        if (cell[0] == self.size - 1):
-            self.groups.join(self.EDGE2, cell)
-        # join any groups connected by the new white stone
-        for n in self.neighbors(cell):
-            if (self.board[n] == self.PLAYERS["white"]):
-                self.white.join(n, cell)
-            elif (self.board[n] == self.PLAYERS["black"]):
-                self.black.join(n, cell)
+    def do_move(self, cell):
+        if self.player_just_moved == 1:
+            """
+            Place a white stone regardless of whose turn it is.
+            """
+            if (self.board[cell] == self.PLAYERS["none"]):
+                self.board[cell] = self.PLAYERS["white"]
+            else:
+                raise ValueError("Cell occupied")
+            # if the placed cell touches a white edge connect it appropriately
+            if (cell[0] == 0):
+                self.white.join(self.EDGE1, cell)
+            if (cell[0] == self.size - 1):
+                self.white.join(self.EDGE2, cell)
+            # join any groups connected by the new white stone
+            for n in self.neighbors(cell):
+                if (self.board[n] == self.PLAYERS["white"]):
+                    self.white.join(n, cell)
+        elif self.player_just_moved == 2:
+            """
+                        Place a white stone regardless of whose turn it is.
+                        """
+            if (self.board[cell] == self.PLAYERS["none"]):
+                self.board[cell] = self.PLAYERS["black"]
+            else:
+                raise ValueError("Cell occupied")
+            # if the placed cell touches a white edge connect it appropriately
+            if (cell[0] == 0):
+                self.black.join(self.EDGE1, cell)
+            if (cell[0] == self.size - 1):
+                self.black.join(self.EDGE2, cell)
+            # join any groups connected by the new white stone
+            for n in self.neighbors(cell):
+                if (self.board[n] == self.PLAYERS["white"]):
+                    self.black.join(n, cell)
 
-    def place_white(self, cell):
-        """
-        Place a white stone regardless of whose turn it is.
-        """
-        if (self.board[cell] == self.PLAYERS["none"]):
-            self.board[cell] = self.PLAYERS["white"]
-        else:
-            raise ValueError("Cell occupied")
-        # if the placed cell touches a white edge connect it appropriately
-        if (cell[0] == 0):
-            self.white.join(self.EDGE1, cell)
-        if (cell[0] == self.size - 1):
-            self.white.join(self.EDGE2, cell)
-        # join any groups connected by the new white stone
-        for n in self.neighbors(cell):
-            if (self.board[n] == self.PLAYERS["white"]):
-                self.white.join(n, cell)
-
-    def place_black(self, cell):
-        """
-        Place a black stone regardless of whose turn it is.
-        """
-        if (self.board[cell] == self.PLAYERS["none"]):
-            self.board[cell] = self.PLAYERS["black"]
-        else:
-            raise ValueError("Cell occupied")
-        # if the placed cell touches a black edge connect it appropriately
-        if (cell[1] == 0):
-            self.black.join(self.EDGE1, cell)
-        if (cell[1] == self.size - 1):
-            self.black.join(self.EDGE2, cell)
-        # join any groups connected by the new black stone
-        for n in self.neighbors(cell):
-            if (self.board[n] == self.PLAYERS["black"]):
-                self.black.join(n, cell)
+        self.player_just_moved = 3 - self.player_just_moved
 
     def clone(self):
         """
@@ -93,6 +77,10 @@ class HexState:
         st = HexState(self.game_setting)
         st.player_just_moved = self.player_just_moved
         return st
+    """
+    def do_move(self, move):
+        self.player_just_moved = 3 - self.player_just_moved
+    """
 
     def get_moves(self):
         """
@@ -111,18 +99,22 @@ class HexState:
         return [(n[0] + x, n[1] + y) for n in self.neighbor_patterns \
                 if (0 <= n[0] + x and n[0] + x < self.size and 0 <= n[1] + y and n[1] + y < self.size)]
 
-    def get_result(self):
-        if self.black.connected == True:
-                return "black"
-        elif self.white.connected == True:
-                return "white"
+    def get_result(self, playerjm):
+        """
+        Returnerer resultatet fra playerjm sitt ståsted
+        """
+        #assert self.black.connected == True or self.white.connected == True
+        if self.player_just_moved == playerjm:
+            return 1.0
+        else:
+            return 0.0
 
     def __str__(self):
         """
         Print an ascii representation of the game board.
         """
-        white = 'O'
-        black = '@'
+        white = 'O' # PLAYER 1
+        black = '@' #PLAYER 2
         empty = '.'
         ret = '\n'
         coord_size = len(str(self.size))
