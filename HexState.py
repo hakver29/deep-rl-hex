@@ -17,7 +17,8 @@ class HexState:
         self.game_setting = game_setting
         self.toplay = game_setting.P
 
-        self.white_groups, self.black_groups = unionfind(),unionfind()
+        self.white_groups = unionfind()
+        self.black_groups = unionfind()
         self.groups = unionfind()
 
     def play(self, cell):
@@ -35,7 +36,7 @@ class HexState:
         """
         Place a white stone regardless of whose turn it is.
         """
-        if player_to_play == "black":
+        if player_to_play == "white":
             if (self.board[cell] == self.PLAYERS["none"]):
                 self.board[cell] = self.PLAYERS["white"]
             else:
@@ -49,7 +50,7 @@ class HexState:
             for n in self.neighbors(cell):
                 if (self.board[n] == self.PLAYERS["white"]):
                     self.groups.join(n, cell)
-        elif player_to_play == "white":
+        elif player_to_play == "black":
             if (self.board[cell] == self.PLAYERS["none"]):
                 self.board[cell] = self.PLAYERS["black"]
             else:
