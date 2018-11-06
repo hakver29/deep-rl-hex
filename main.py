@@ -35,9 +35,9 @@ def tree_search(rootstate, itermax, verbose=False):
 
         # Expansion
         if node.untried_moves != []:
-            moves = random.choice(node.untried_moves)
-            state.do_move(moves)
-            node = node.add_child(moves, state)
+            move = random.choice(node.untried_moves)
+            state.do_move(move)
+            node = node.add_child(move, state)
 
         # Simulation
         while state.get_moves() != []:
@@ -59,18 +59,17 @@ def play_game(game_setting):
     """
     player_wins = [0, 0]
     for i in range(game_setting.G):
-        state = HexState(game_setting, game_setting.N)
+        state = HexState(game_setting)
         while (state.get_moves() != []):
             move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose)
             state.do_move(move)
             if game_setting.verbose == True:
                 if move == 1:
                     print("Player " + str(state.player_just_moved) + " selects " + str(
-                        move) + " stone. " + "Stones remaining = " + str(state.stones_remaining))
+                        move))
                 else:
                     print("Player " + str(state.player_just_moved) + " selects " + str(
-                        move) + " stones. " + "Stones remaining = " + str(
-                        state.stones_remaining))
+                        move))
 
         if game_setting.verbose == True:
             if state.get_result(state.player_just_moved) == 1.0:
@@ -87,15 +86,17 @@ def play_game(game_setting):
 #play_game(game_setting)
 
 game_setting = GameSetting()
+play_game(game_setting)
+
+"""
 state = HexState(game_setting)
-state.place_tile((0,0), "black")
-state.place_tile((0,1), "black")
-state.place_tile((0,2), "black")
-state.place_tile((1,0), "white")
+state.place_black((0,0))
+state.place_black((0,2))
+state.place_black((0,1))
+#state.place_white((0,1))
+state.place_white((1,1))
+state.place_white((2,1))
 print(state)
-print(state.white_groups.connected(state.EDGE1,state.EDGE2))
-print(state.black_groups.connected(state.EDGE1,state.EDGE2))
-print(state.groups.connected(state.EDGE1,state.EDGE2))
-print("test")
-print(state.neighbors((1,1)))
-print(state.get_moves())
+print(state.white.connected(state.EDGE1,state.EDGE2))
+print(state.black.connected(state.EDGE1,state.EDGE2))
+"""
