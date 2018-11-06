@@ -12,13 +12,13 @@ class HexState:
 
     def __init__(self, game_setting):
         self.size = game_setting.size
-        self.player_just_moved = game_setting.P
+        self.player_to_play = game_setting.P
         self.board = np.zeros((game_setting.size,game_setting.size))
         self.game_setting = game_setting
-        self.toplay = self.PLAYERS["white"]
+        self.toplay = game_setting.P
 
-        self.white_groups = unionfind()
-        self.black_groups = unionfind()
+        self.white_groups, self.black_groups = unionfind(),unionfind()
+        self.groups = unionfind()
 
     def play(self, cell):
         """
@@ -30,6 +30,39 @@ class HexState:
         elif (self.toplay == self.PLAYERS["black"]):
             self.place_black(cell)
             self.toplay = self.PLAYERS["white"]
+
+    def place_tile(self, cell, player_to_play):
+        """
+        Place a white stone regardless of whose turn it is.
+        """
+        if player_to_play == "black":
+            if (self.board[cell] == self.PLAYERS["none"]):
+                self.board[cell] = self.PLAYERS["white"]
+            else:
+                raise ValueError("Cell occupied")
+            # if the placed cell touches a white edge connect it appropriately
+            if (cell[0] == 0):
+                self.groups.join(self.EDGE1, cell)
+            if (cell[0] == self.size - 1):
+                self.groups.join(self.EDGE2, cell)
+            # join any groups connected by the new white stone
+            for n in self.neighbors(cell):
+                if (self.board[n] == self.PLAYERS["white"]):
+                    self.groups.join(n, cell)
+        elif player_to_play == "white":
+            if (self.board[cell] == self.PLAYERS["none"]):
+                self.board[cell] = self.PLAYERS["black"]
+            else:
+                raise ValueError("Cell occupied")
+            # if the placed cell touches a black edge connect it appropriately
+            if (cell[1] == 0):
+                self.groups.join(self.EDGE1, cell)
+            if (cell[1] == self.size - 1):
+                self.groups.join(self.EDGE2, cell)
+            # join any groups connected by the new black stone
+            for n in self.neighbors(cell):
+                if (self.board[n] == self.PLAYERS["black"]):
+                    self.groups.join(n, cell)
 
     def place_white(self, cell):
         """

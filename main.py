@@ -59,7 +59,7 @@ def play_game(game_setting):
     """
     player_wins = [0, 0]
     for i in range(game_setting.G):
-        state = NimState(game_setting, game_setting.N)
+        state = HexState(game_setting, game_setting.N)
         while (state.get_moves() != []):
             move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose)
             state.do_move(move)
@@ -89,12 +89,12 @@ def play_game(game_setting):
 game_setting = GameSetting()
 state = HexState(game_setting)
 state.place_black((0,0))
-state.place_black((1,0))
-state.place_black((2,0))
-state.place_white((0,1))
+state.place_black((0,1))
+state.place_black((0,2))
+state.place_white((1,0))
 print(state)
 print(state.white_groups.connected(state.EDGE1,state.EDGE2))
 print(state.black_groups.connected(state.EDGE1,state.EDGE2))
 print("test")
-print(state.neighbors((0,0)))
+print(state.neighbors((1,1)))
 print(state.get_moves())
