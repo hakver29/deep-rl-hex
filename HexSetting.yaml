@@ -1,4 +1,4 @@
-G: 4 # Number of games played
+G: 1 # Number of games played
 P: 1 # Starting player
 M: 10 # Number of simulations
 verbose: True

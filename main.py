@@ -70,6 +70,7 @@ def play_game(game_setting):
                 else:
                     print("Player " + str(state.player_just_moved) + " selects " + str(
                         move))
+            print(state)
 
         if game_setting.verbose == True:
             if state.get_result(state.player_just_moved) == 1.0:
