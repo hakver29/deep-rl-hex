@@ -21,9 +21,6 @@ class HexState:
 
     def do_move(self, cell):
         if self.player_just_moved == "black":
-            """
-            Place a white stone regardless of whose turn it is.
-            """
             if (self.board[cell] == self.PLAYERS["none"]):
                 self.board[cell] = self.PLAYERS["white"]
             else:
@@ -39,9 +36,6 @@ class HexState:
                     self.white.join(n, cell)
             self.player_just_moved = "white"
         elif self.player_just_moved == "white":
-            """
-                        Place a white stone regardless of whose turn it is.
-                        """
             if (self.board[cell] == self.PLAYERS["none"]):
                 self.board[cell] = self.PLAYERS["black"]
             else:
