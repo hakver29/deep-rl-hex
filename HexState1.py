@@ -109,6 +109,15 @@ class HexState1:
         else:
             return self.PLAYERS["none"]
 
+    def get_result(self, playertp):
+        """
+        Returnerer resultatet fra playerjm sitt ståsted
+        """
+        if self.toplay == playertp:
+            return 1.0
+        else:
+            return 0.0
+
     def neighbors(self, cell):
         """
         Return list of neighbors of the passed cell.

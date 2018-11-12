@@ -47,7 +47,21 @@ def tree_search(rootstate, itermax, verbose=False):
 
         # Backpropagation
         while node != None:
-            node.update(state.winner())
+            # node.update(state.get_result(node.player_just_moved))
+            # node = node.parentNode
+            #node.update(state.winner())
+            #print(state.get_result(node.toplay))
+            #node.update(state.winner())
+            #print(state.toplay)
+            #print("Winner")
+            #print(state.winner())
+            #print("To play")
+            #print(state.toplay)
+            #node.update(state.get_result(node.toplay))
+            node.visits += 1
+            if state.toplay == state.winner():
+                node.wins += 1
+
             node = node.parentNode
 
     if game_setting.verbose == True:
@@ -64,7 +78,6 @@ def play_game(game_setting):
         state = HexState1(game_setting)
         while (state.white_groups.connected(1,2) == False and state.black_groups.connected(1,2) == False):
             move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose)
-            print(state.toplay)
             if state.toplay == 2:
                 state.place_black(move)
                 state.toplay = 1
@@ -75,7 +88,11 @@ def play_game(game_setting):
             print(state)
 
             if game_setting.verbose == True:
-                print("Player " + str(state.toplay) + " selects " + str(move))
+                if state.toplay == 1:
+                    print("Player 2 selects " + str(move))
+                elif state.toplay == 2:
+                    print("Player 1 selects " + str(move))
+                #print("Player " + str(state.toplay) + " selects " + str(move))
         if game_setting.verbose == True:
             if state.winner() == 2:
                 print("Player black wins" + "\n")
