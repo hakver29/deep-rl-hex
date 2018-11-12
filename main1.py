@@ -1,11 +1,12 @@
-from Node import *
+#from Node import *
 #from HexState import *
+from Node1 import *
 from HexState1 import *
 from GameSetting import *
 from Board import *
 
 def tree_search(rootstate, itermax, verbose=False):
-    rootnode = Node(state=rootstate)
+    rootnode = Node1(state=rootstate)
 
     for i in range(itermax):
         node = rootnode
@@ -32,23 +33,22 @@ def tree_search(rootstate, itermax, verbose=False):
         # Selection
         while node.untried_moves == [] and node.childNodes != []:
             node = node.select_child()
-            state.do_move(node.move)
+            state.play(node.move)
 
         # Expansion
         if node.untried_moves != []:
             move = random.choice(node.untried_moves)
-            state.do_move(move)
+            state.play(move)
             node = node.add_child(move, state)
 
         # Simulation
-        while state.get_moves() != []:
-            state.do_move(random.choice(state.get_moves()))
+        while state.moves() != []:
+            state.play(random.choice(state.moves()))
 
         # Backpropagation
         while node != None:
-            node.update(state.get_result(node.player_just_moved))
+            node.update(state.winner())
             node = node.parentNode
-
 
     if game_setting.verbose == True:
         print(rootnode.children_to_string())
@@ -64,44 +64,29 @@ def play_game(game_setting):
         state = HexState1(game_setting)
         while (state.white_groups.connected(1,2) == False and state.black_groups.connected(1,2) == False):
             move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose)
-            if state.player_just_moved == "black":
-                state.place_white(move)
-                state.player_just_moved = "white"
-            elif state.player_just_moved == "white":
+            print(state.toplay)
+            if state.toplay == 2:
                 state.place_black(move)
-                state.player_just_moved = "black"
+                state.toplay = 1
+            elif state.toplay == 1:
+                state.place_white(move)
+                state.toplay = 2
 
             print(state)
 
             if game_setting.verbose == True:
-                print("Player " + str(state.player_just_moved) + " selects " + str(move))
+                print("Player " + str(state.toplay) + " selects " + str(move))
         if game_setting.verbose == True:
-            if state.get_result(state.player_just_moved) == 1.0:
-                print("Player " + str(state.player_just_moved) + " wins" + "\n")
-            elif state.get_result(state.player_just_moved) == 0.0:
-                print("Player " + str(state.player_just_moved) + " wins" + "\n")
-        player_wins[state.player_just_moved] += 1
+            if state.winner() == 2:
+                print("Player black wins" + "\n")
+            elif state.winner() == 1:
+                print("Player white wins" + "\n")
+
+        if state.winner() == 1:
+            player_wins["white"] += 1
+        elif state.winner() == 2:
+            player_wins["black"] += 1
     print(player_wins)
-
-
-#game_setting = GameSetting()
-#play_game(game_setting)
 
 game_setting = GameSetting()
 play_game(game_setting)
-
-"""
-state = HexState(game_setting)
-state.place_black((0,0))
-state.place_black((0,2))
-state.place_black((0,1))
-#state.place_white((0,1))
-state.place_white((1,1))
-state.place_white((2,1))
-print(state)
-print(state.white.connected(state.EDGE1,state.EDGE2))
-print(state.black.connected(state.EDGE1,state.EDGE2))
-"""
-
-"WHITE: 1"
-"BLACK: 2"
