@@ -58,8 +58,14 @@ def tree_search(rootstate, itermax, verbose=False):
             #print("To play")
             #print(state.toplay)
             #node.update(state.get_result(node.toplay))
+
+            #print("YALLA")
+            #print(state.winner())
+            #print(rootstate.toplay)
+            #print("YALLA")
+
             node.visits += 1
-            if state.toplay == state.winner():
+            if rootstate.toplay == state.winner():
                 node.wins += 1
 
             node = node.parentNode

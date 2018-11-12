@@ -26,6 +26,7 @@ class HexState1:
         """
         self.size = gamesetting.size
         self.toplay = self.PLAYERS["white"]
+        #self.toplay = self.PLAYERS[gamesetting.P]
         self.board = np.zeros((gamesetting.size, gamesetting.size))
         self.gamesetting = gamesetting
         self.white_groups = unionfind()
