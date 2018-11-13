@@ -52,8 +52,6 @@ def tree_search(rootstate, itermax, verbose=False):
             node.visits += 1
             if rootstate.turn() == state.winner():
                 node.wins += 1
-
-
             node = node.parentNode
 
     if game_setting.verbose == True:
