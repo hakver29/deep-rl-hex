@@ -1,0 +1,77 @@
+#tf.nn.relu
+#tf.nn.relu6
+#tf.nn.crelu
+#tf.nn.elu
+#tf.nn.selu
+#tf.nn.softplus
+#tf.nn.softsign
+#tf.nn.dropout
+#tf.nn.bias_add
+#tf.sigmoid
+#tf.tanh
+
+activation_function: "relu"
+hidden_function: "relu"
+output_function: "softmax"
+
+#Input and output layer always has board_size² number of neurons.
+#The "hidden_layers" field can be set to define a custom number of hidden layers with a custom number of neurons.
+#Leave the field empty to use the appropriate, default values for whatever board size is defined
+#in the game settings. Set number of neurons in a layer to 0 in order to default to board_size² number of
+#neurons.
+
+#Ex "hidden_layers = 0,0,0" will give three hidden layers with default number of neurons. If the board_size is 4,
+#then each hidden layer
+#will have 16 neurons.
+
+#Ex "hidden_layers = 5,5,5" will give three hidden layers, each with 5 neurons.
+
+#Ex "hidden_layers = 5,0,5" will give three hidden layers. First and last layer has 5 neurons. Middle layer has
+#board_size² number of neurons.
+
+#Ex "hidden_layers =" will default to a hardcoded set of parameters that set an appropriate number of hidden layers
+#with an appropriate number of neurons relative to the board size.
+
+hidden_layers: 0,0,0
+
+
+#SGD
+#RMSprop
+#Adagrad
+#Adadelta
+#Adam
+#Adamax
+#Nadam
+
+optimizer: Adam
+
+#mean_squared_error
+#mean_absolute_error
+#mean_absolute_percentage_error
+#mean_squared_logarithmic_error
+#squared_hinge
+#hinge
+#categorical_hinge
+#logcosh
+#categorical_crossentropy
+#sparse_categorical_crossentropy
+#binary_crossentropy
+#kullback_leibler_divergence
+#poisson
+#cosine_proximity
+
+loss_function:  categorical_crossentropy
+
+
+#binary_accuracy
+#categorical_accuracy
+#sparse_categorical_accuracy
+#top_k_categorical_accuracy
+#sparse_top_k_categorical_accuracy
+
+metrics: categorical_accuracy
+
+
+#This parameter defines how many epochs should be run for each training_batch
+
+epochs: 5
