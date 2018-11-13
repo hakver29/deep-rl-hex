@@ -11,7 +11,6 @@ def tree_search(rootstate, itermax, verbose=False):
 
     for i in range(itermax):
         node = rootnode
-        #state = rootstate.clone()
         state = copy.deepcopy(rootstate)
 
         """
@@ -56,6 +55,9 @@ def tree_search(rootstate, itermax, verbose=False):
 
     if game_setting.verbose == True:
         print(rootnode.children_to_string())
+
+    append_mcts_result_to_training_data(rootnode, rootstate)
+
     return max(rootnode.childNodes, key=lambda c: c.visits).move
 
 
@@ -95,7 +97,25 @@ def play_game(game_setting):
             player_wins["black"] += 1
     print(player_wins)
 
+
+def append_mcts_result_to_training_data(rootnode, rootstate):
+    target = [0] * game_setting.size**2
+
+    for child_node in rootnode.childNodes:
+        move = child_node.move[1]*game_setting.size+child_node.move[0]
+        target[move] = child_node.wins/child_node.visits
+
+    input = rootstate.board.flatten()
+    for i in range(0,len(input)):
+        if input[i] == 2.0:
+            input[i] = -1
+
+    training_data_file.write(",".join(str(int(input)) for input in input)+"|"+",".join(str(target) for target in target)+"\n")
+
+
+
 game_setting = GameSetting()
+training_data_file = open(game_setting.training_data_file_path, "w+")
 """
 state = HexState1(game_setting)
 print(state)
@@ -107,4 +127,5 @@ print(state)
 print(state.winner())
 """
 play_game(game_setting)
+training_data_file.close()
 
