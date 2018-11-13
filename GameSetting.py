@@ -1,5 +1,9 @@
 import yaml
-from definitions import ROOT_DIR
+from definitions import ROOT_DIR, DATA_DIR
+from datetime import datetime
+import random
+import string
+import time
 
 
 class GameSetting:
@@ -20,6 +24,7 @@ class GameSetting:
         self.loss_function = neural_net_config['loss_function']
         self.metrics = neural_net_config['metrics']
         self.epochs = int(neural_net_config['epochs'])
+        self.training_data_file_path = DATA_DIR+''.join(str(dim) for dim in self.network_dimensions)+"-"+str(time.time()+datetime.now().microsecond)+"-"+''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
 
     def read_network_dimensions(self, hidden_layer_dims):
         network_dimensions = [self.size**2]
