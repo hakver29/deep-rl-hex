@@ -44,7 +44,7 @@ def tree_search(rootstate, itermax, verbose=False):
             node = node.add_child(move, state)
 
         # Simulation
-        while state.moves() != [] and state.winner() == 0:
+        while state.winner() == 0:
             state.play(random.choice(state.moves()))
 
         # Backpropagation
@@ -75,8 +75,6 @@ def play_game(game_setting):
                 state.place_white(move)
                 state.set_turn(2)
 
-            print(state)
-
             if game_setting.verbose == True:
                 if state.toplay == 1:
                     print("Player 2 selects " + str(move) + "\n")
@@ -88,6 +86,8 @@ def play_game(game_setting):
                 print("Player black wins" + "\n")
             elif state.winner() == 1:
                 print("Player white wins" + "\n")
+
+        print(state)
 
         if state.winner() == 1:
             player_wins["white"] += 1
