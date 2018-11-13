@@ -38,10 +38,10 @@ class HexState1:
         """
         if(self.toplay == self.PLAYERS["white"]):
             self.place_white(cell)
-            self.toplay = self.PLAYERS["black"]
+            self.set_turn(2)
         elif(self.toplay == self.PLAYERS["black"]):
             self.place_black(cell)
-            self.toplay = self.PLAYERS["white"]
+            self.set_turn(1)
 
     def place_white(self, cell):
         """
@@ -124,7 +124,7 @@ class HexState1:
         Return list of neighbors of the passed cell.
         """
         x = cell[0]
-        y=cell[1]
+        y = cell[1]
         return [(n[0]+x , n[1]+y) for n in self.neighbor_patterns\
             if (0<=n[0]+x and n[0]+x<self.size and 0<=n[1]+y and n[1]+y<self.size)]
 

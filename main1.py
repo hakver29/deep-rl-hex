@@ -42,30 +42,13 @@ def tree_search(rootstate, itermax, verbose=False):
             node = node.add_child(move, state)
 
         # Simulation
-        while state.moves() != []:
+        while state.moves() != [] and state.winner() == 0:
             state.play(random.choice(state.moves()))
 
         # Backpropagation
         while node != None:
-            # node.update(state.get_result(node.player_just_moved))
-            # node = node.parentNode
-            #node.update(state.winner())
-            #print(state.get_result(node.toplay))
-            #node.update(state.winner())
-            #print(state.toplay)
-            #print("Winner")
-            #print(state.winner())
-            #print("To play")
-            #print(state.toplay)
-            #node.update(state.get_result(node.toplay))
-
-            #print("YALLA")
-            #print(state.winner())
-            #print(rootstate.toplay)
-            #print("YALLA")
-
             node.visits += 1
-            if rootstate.toplay == state.winner():
+            if rootstate.turn() == state.winner():
                 node.wins += 1
 
             node = node.parentNode
@@ -86,18 +69,19 @@ def play_game(game_setting):
             move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose)
             if state.toplay == 2:
                 state.place_black(move)
-                state.toplay = 1
+                state.set_turn(1)
             elif state.toplay == 1:
                 state.place_white(move)
-                state.toplay = 2
+                state.set_turn(2)
 
-            print(state)
+            #print(state)
+
 
             if game_setting.verbose == True:
                 if state.toplay == 1:
-                    print("Player 2 selects " + str(move))
+                    print("Player 2 selects " + str(move) + "\n")
                 elif state.toplay == 2:
-                    print("Player 1 selects " + str(move))
+                    print("Player 1 selects " + str(move) + "\n")
                 #print("Player " + str(state.toplay) + " selects " + str(move))
         if game_setting.verbose == True:
             if state.winner() == 2:
@@ -112,4 +96,15 @@ def play_game(game_setting):
     print(player_wins)
 
 game_setting = GameSetting()
+"""
+state = HexState1(game_setting)
+print(state)
+print(state.place_white((1,1)))
+print(state.place_black((0,0)))
+print(state.place_white((1,0)))
+print(state.place_black((0,1)))
+print(state)
+print(state.winner())
+"""
 play_game(game_setting)
+
