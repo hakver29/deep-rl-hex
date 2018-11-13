@@ -4,13 +4,15 @@ from Node1 import *
 from HexState1 import *
 from GameSetting import *
 from Board import *
+import copy
 
 def tree_search(rootstate, itermax, verbose=False):
     rootnode = Node1(state=rootstate)
 
     for i in range(itermax):
         node = rootnode
-        state = rootstate.clone()
+        #state = rootstate.clone()
+        state = copy.deepcopy(rootstate)
 
         """
         Selection: start from root R and select successive child nodes until a leaf node L is reached. The root is the 
@@ -51,6 +53,7 @@ def tree_search(rootstate, itermax, verbose=False):
             if rootstate.turn() == state.winner():
                 node.wins += 1
 
+
             node = node.parentNode
 
     if game_setting.verbose == True:
@@ -74,8 +77,7 @@ def play_game(game_setting):
                 state.place_white(move)
                 state.set_turn(2)
 
-            #print(state)
-
+            print(state)
 
             if game_setting.verbose == True:
                 if state.toplay == 1:

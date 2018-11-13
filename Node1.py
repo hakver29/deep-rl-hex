@@ -24,7 +24,7 @@ class Node1:
         c.visits stands for the number of simulations for the node considered after the i-th move
         self.visits stands for the total number of simulations after the i-th move
         """
-        state = max(self.childNodes, key=lambda c: c.wins / c.visits + 0.4*sqrt(2 * log(self.visits) / c.visits))
+        state = max(self.childNodes, key=lambda c: c.wins / c.visits + sqrt(2 * log(self.visits) / c.visits))
         return state
 
     def add_child(self, move, state):
