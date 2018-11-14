@@ -2,7 +2,7 @@ from math import *
 import random
 
 
-class Node:
+class Node1:
     """
     Node i treet. Resultatet til en node er alltid fra spilleren som nettopp beveget seg
     """
@@ -14,7 +14,7 @@ class Node:
         self.wins = 0
         self.visits = 0
         self.untried_moves = state.moves()  # child nodes
-        self.player_just_moved = state.player_just_moved
+        self.toplay = state.turn()
 
     def select_child(self):
         """
@@ -32,7 +32,7 @@ class Node:
         Fjerner move fra untried_motves og lager en ny child node.
         Returnerer child-noden som er generert.
         """
-        node = Node(move=move, parent=self, state=state)
+        node = Node1(move=move, parent=self, state=state)
         self.untried_moves.remove(move)
         self.childNodes.append(node)
         return node
@@ -50,7 +50,10 @@ class Node:
         """
         s = ""
         for c in self.childNodes:
-            s += str(c) + "\n"
+            if c == self.childNodes[-1]:
+                s += str(c)
+            else:
+                s += str(c) + "\n"
         return s
 
     """

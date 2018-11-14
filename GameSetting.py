@@ -24,7 +24,7 @@ class GameSetting:
         self.loss_function = neural_net_config['loss_function']
         self.metrics = neural_net_config['metrics']
         self.epochs = int(neural_net_config['epochs'])
-        self.training_data_file_path = DATA_DIR+''.join(str(dim) for dim in self.network_dimensions)+"-"+str(time.time()+datetime.now().microsecond)+"-"+''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
+        self.training_data_file_path = DATA_DIR+'n'.join(str(dim) for dim in self.network_dimensions)+"-"+str(time.time()+datetime.now().microsecond)+"-"+''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
 
     def read_network_dimensions(self, hidden_layer_dims):
         network_dimensions = [self.size**2]
