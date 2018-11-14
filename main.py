@@ -1,15 +1,17 @@
-from Node import *
+#from Node import *
 #from HexState import *
-from HexState1 import *
+from Node import *
+from HexState import *
 from GameSetting import *
 from Board import *
+import copy
 
 def tree_search(rootstate, itermax, verbose=False):
-    rootnode = Node(state=rootstate)
+    rootnode = Node1(state=rootstate)
 
     for i in range(itermax):
         node = rootnode
-        state = rootstate.clone()
+        state = copy.deepcopy(rootstate)
 
         """
         Selection: start from root R and select successive child nodes until a leaf node L is reached. The root is the 
@@ -32,26 +34,30 @@ def tree_search(rootstate, itermax, verbose=False):
         # Selection
         while node.untried_moves == [] and node.childNodes != []:
             node = node.select_child()
-            state.do_move(node.move)
+            state.play(node.move)
 
         # Expansion
         if node.untried_moves != []:
             move = random.choice(node.untried_moves)
-            state.do_move(move)
+            state.play(move)
             node = node.add_child(move, state)
 
         # Simulation
-        while state.get_moves() != []:
-            state.do_move(random.choice(state.get_moves()))
+        while state.winner() == 0:
+            state.play(random.choice(state.moves()))
 
         # Backpropagation
         while node != None:
-            node.update(state.get_result(node.player_just_moved))
+            node.visits += 1
+            if rootstate.turn() == state.winner():
+                node.wins += 1
             node = node.parentNode
-
 
     if game_setting.verbose == True:
         print(rootnode.children_to_string())
+
+    append_mcts_result_to_training_data(rootnode, rootstate)
+
     return max(rootnode.childNodes, key=lambda c: c.visits).move
 
 
@@ -64,44 +70,65 @@ def play_game(game_setting):
         state = HexState1(game_setting)
         while (state.white_groups.connected(1,2) == False and state.black_groups.connected(1,2) == False):
             move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose)
-            if state.player_just_moved == "black":
-                state.place_white(move)
-                state.player_just_moved = "white"
-            elif state.player_just_moved == "white":
+            if state.toplay == 2:
                 state.place_black(move)
-                state.player_just_moved = "black"
-
-            print(state)
+                state.set_turn(1)
+            elif state.toplay == 1:
+                state.place_white(move)
+                state.set_turn(2)
 
             if game_setting.verbose == True:
-                print("Player " + str(state.player_just_moved) + " selects " + str(move))
+                if state.toplay == 1:
+                    print("Player 2 selects " + str(move) + "\n")
+                elif state.toplay == 2:
+                    print("Player 1 selects " + str(move) + "\n")
+                #print("Player " + str(state.toplay) + " selects " + str(move))
         if game_setting.verbose == True:
-            if state.get_result(state.player_just_moved) == 1.0:
-                print("Player " + str(state.player_just_moved) + " wins" + "\n")
-            elif state.get_result(state.player_just_moved) == 0.0:
-                print("Player " + str(state.player_just_moved) + " wins" + "\n")
-        player_wins[state.player_just_moved] += 1
+            if state.winner() == 2:
+                print("Player black wins" + "\n")
+            elif state.winner() == 1:
+                print("Player white wins" + "\n")
+
+        print(state)
+
+        if state.winner() == 1:
+            player_wins["white"] += 1
+        elif state.winner() == 2:
+            player_wins["black"] += 1
     print(player_wins)
 
 
-#game_setting = GameSetting()
-#play_game(game_setting)
+def append_mcts_result_to_training_data(rootnode, rootstate):
+    target = [0] * game_setting.size**2
+
+    for child_node in rootnode.childNodes:
+        move = child_node.move[1]*game_setting.size+child_node.move[0]
+        target[move] = child_node.wins/child_node.visits
+
+    input = rootstate.board.flatten()
+    for i in range(0,len(input)):
+        if input[i] == float(rootstate.toplay):
+            input[i] = 1
+        elif input[i] != 0.0:
+            input[i] = -1
+
+
+    training_data_file.write(",".join(str(int(input)) for input in input)+"|"+",".join(str(target) for target in target)+"|"+rootstate.toplay+"\n")
+
+
 
 game_setting = GameSetting()
-play_game(game_setting)
-
+training_data_file = open(game_setting.training_data_file_path, "w+")
 """
-state = HexState(game_setting)
-state.place_black((0,0))
-state.place_black((0,2))
-state.place_black((0,1))
-#state.place_white((0,1))
-state.place_white((1,1))
-state.place_white((2,1))
+state = HexState1(game_setting)
 print(state)
-print(state.white.connected(state.EDGE1,state.EDGE2))
-print(state.black.connected(state.EDGE1,state.EDGE2))
+print(state.place_white((1,1)))
+print(state.place_black((0,0)))
+print(state.place_white((1,0)))
+print(state.place_black((0,1)))
+print(state)
+print(state.winner())
 """
+play_game(game_setting)
+training_data_file.close()
 
-"WHITE: 1"
-"BLACK: 2"
