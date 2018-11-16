@@ -3,10 +3,22 @@
 from Node import *
 from HexState import *
 from GameSetting import *
-from Board import *
 import copy
+from Policy import Policy
 
-def tree_search(rootstate, itermax, verbose=False):
+
+def convertIntegerToCoordinate(intMove, boardSize):
+    ycoordinate = intMove//boardSize
+    xcoordinate = intMove%boardSize
+    return xcoordinate,ycoordinate
+
+
+def convertCoordinateToInteger(move, boardSize):
+    return move[1]*boardSize + move[0]
+
+
+
+def tree_search(rootstate, itermax, verbose=False, policy=None):
     rootnode = Node1(state=rootstate)
 
     for i in range(itermax):
@@ -56,12 +68,15 @@ def tree_search(rootstate, itermax, verbose=False):
     if game_setting.verbose == True:
         print(rootnode.children_to_string())
 
-    append_mcts_result_to_training_data(rootnode, rootstate)
+    if policy is None:
+        append_mcts_result_to_training_data(rootnode, rootstate)
+        return max(rootnode.childNodes, key=lambda c: c.visits).move
+    else:
+        intMove = policy.select(rootstate.board.flatten(), [convertCoordinateToInteger(childNode.move, game_setting.size) for childNode in rootnode.childNodes])
+        return convertIntegerToCoordinate(intMove,game_setting.size)
 
-    return max(rootnode.childNodes, key=lambda c: c.visits).move
 
-
-def play_game(game_setting):
+def play_game(game_setting, policy=None):
     """
     Spiller et enkelt spill mellom to spillere
     """
@@ -69,7 +84,7 @@ def play_game(game_setting):
     for i in range(game_setting.G):
         state = HexState1(game_setting)
         while (state.white_groups.connected(1,2) == False and state.black_groups.connected(1,2) == False):
-            move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose)
+            move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose, policy=policy)
             if state.toplay == 2:
                 state.place_black(move)
                 state.set_turn(1)
@@ -113,12 +128,13 @@ def append_mcts_result_to_training_data(rootnode, rootstate):
             input[i] = -1
 
 
-    training_data_file.write(",".join(str(int(input)) for input in input)+"|"+",".join(str(target) for target in target)+"|"+rootstate.toplay+"\n")
+    training_data_file.write(",".join(str(int(input)) for input in input)+"|"+",".join(str(target) for target in target)+"|"+"\n")
 
 
 
 game_setting = GameSetting()
-training_data_file = open(game_setting.training_data_file_path, "w+")
+file_path = training_data_file_path = DATA_DIR+'n'.join(str(dim) for dim in game_setting.network_dimensions)+"-"+str(time.time()+datetime.now().microsecond)+"-"+''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
+training_data_file = open(file_path, "w+")
 """
 state = HexState1(game_setting)
 print(state)
@@ -131,4 +147,8 @@ print(state.winner())
 """
 play_game(game_setting)
 training_data_file.close()
+policy = Policy(game_setting)
+policy.import_all_data_and_train()
+play_game(game_setting,policy=policy)
+
 
