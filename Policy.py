@@ -39,7 +39,7 @@ class Policy:
 
         print(type(probability_of_moves))
         print(probability_of_moves.argmax())
-        return random.choice(probability_of_moves.argmax()) #Returning the move with highest probability score
+        return probability_of_moves.argmax() #Returning the move with highest probability score
                                                             #If several moves have equal probability, return random
 
         #probability_of_moves = probability_of_moves/probability_of_moves.sum() #Adjusting all remaining probabilities

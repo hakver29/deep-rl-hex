@@ -2,8 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="71afd56e-6084-42e6-9c73-089a80e93245" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/HexSetting.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/HexSetting.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main1.py" beforeDir="false" afterPath="$PROJECT_DIR$/main1.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Node.py" beforeDir="false" afterPath="$PROJECT_DIR$/Node.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Policy.py" beforeDir="false" afterPath="$PROJECT_DIR$/Policy.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -12,121 +15,135 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/deep_rl_hex$main.coverage" NAME="main Coverage Results" MODIFIED="1542025546074" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/deep_rl_hex$main.coverage" NAME="main Coverage Results" MODIFIED="1542383562579" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/deep_rl_hex$policy.coverage" NAME="policy Coverage Results" MODIFIED="1540646186257" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/deep_rl_hex$main1.coverage" NAME="main1 Coverage Results" MODIFIED="1542128060408" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/deep_rl_hex$main1.coverage" NAME="main1 Coverage Results" MODIFIED="1542369578587" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FUSProjectUsageTrigger">
     <session id="1243441530">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="11" />
-          <entry key="project.open.time.0" value="2" />
+          <entry key="project.closed" value="13" />
+          <entry key="project.open.time.0" value="3" />
           <entry key="project.open.time.1" value="7" />
-          <entry key="project.open.time.11" value="1" />
+          <entry key="project.open.time.11" value="2" />
           <entry key="project.open.time.4" value="1" />
           <entry key="project.open.time.9" value="1" />
-          <entry key="project.opened" value="12" />
+          <entry key="project.opened" value="14" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="31" />
-          <entry key="yaml" value="5" />
+          <entry key="185574-58VSC" value="1" />
+          <entry key="crt" value="1" />
+          <entry key="py" value="41" />
+          <entry key="yaml" value="6" />
           <entry key="yml" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Python" value="31" />
+          <entry key="PLAIN_TEXT" value="2" />
+          <entry key="Python" value="41" />
           <entry key="Scratch" value="1" />
-          <entry key="YAML" value="5" />
+          <entry key="YAML" value="6" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="dummy" value="14" />
-          <entry key="py" value="9272" />
-          <entry key="yaml" value="344" />
+          <entry key="py" value="9486" />
+          <entry key="yaml" value="356" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="14" />
-          <entry key="Python" value="9272" />
-          <entry key="YAML" value="344" />
+          <entry key="Python" value="9486" />
+          <entry key="YAML" value="356" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HexSetting.yaml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="34">
-              <caret line="2" column="5" selection-start-line="2" selection-start-column="5" selection-end-line="2" selection-end-column="5" />
+            <state>
+              <caret column="4" selection-start-column="4" selection-end-column="4" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/HexState.py">
+        <entry file="file://$PROJECT_DIR$/hexclient/BasicClientActor.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="204">
+              <caret line="13" column="52" selection-start-line="13" selection-start-column="52" selection-end-line="13" selection-end-column="109" />
+              <folding>
+                <element signature="e#0#51#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/training_data/4n4n4n4n4-1542555747.185574-58VSC">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="102">
-              <caret line="37" column="22" selection-start-line="37" selection-start-column="22" selection-end-line="37" selection-end-column="22" />
+              <caret line="6" selection-start-line="6" selection-end-line="6" selection-end-column="9" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/hexclient/BasicClientActorAbs.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="187">
+              <caret line="14" column="29" selection-start-line="14" selection-start-column="29" selection-end-line="14" selection-end-column="29" />
               <folding>
-                <element signature="e#0#18#0" expanded="true" />
+                <element signature="e#1#36#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/GameSetting.py">
+        <entry file="file://$PROJECT_DIR$/NeuralNetSetting.yaml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="51">
-              <caret line="3" column="18" selection-start-line="3" selection-start-column="18" selection-end-line="3" selection-end-column="18" />
+            <state relative-caret-position="850">
+              <caret line="50" column="31" selection-start-line="50" selection-start-column="31" selection-end-line="50" selection-end-column="31" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Node.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="544">
+              <caret line="32" column="11" selection-start-line="32" selection-start-column="11" selection-end-line="32" selection-end-column="11" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/train_neural_net.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-100">
+              <caret line="9" column="13" lean-forward="true" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
               <folding>
-                <element signature="e#0#11#0" expanded="true" />
+                <element signature="e#0#22#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/main1.py">
+        <entry file="file://$PROJECT_DIR$/Policy.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="227">
-              <caret line="89" column="20" selection-start-line="89" selection-start-column="20" selection-end-line="89" selection-end-column="20" />
-              <folding>
-                <element signature="e#44#63#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Node1.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-417">
-              <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/HexState1.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="283">
-              <caret line="83" column="17" selection-start-line="83" selection-start-column="17" selection-end-line="83" selection-end-column="17" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-                <marker date="1542111738765" expanded="true" signature="3919:4101" ph="..." />
-              </folding>
+            <state relative-caret-position="323">
+              <caret line="27" column="36" selection-start-line="27" selection-start-column="27" selection-end-line="27" selection-end-column="36" />
             </state>
           </provider>
         </entry>
@@ -142,7 +159,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>white_won</find>
       <find>black_won</find>
       <find>white_group</find>
       <find>player_just_m</find>
@@ -172,6 +188,7 @@
       <find>result</find>
       <find>winner</find>
       <find>update</find>
+      <find>optimizer</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -190,13 +207,15 @@
         <option value="$PROJECT_DIR$/WhichSetting.yaml" />
         <option value="$PROJECT_DIR$/UnionFind.py" />
         <option value="$PROJECT_DIR$/unionfind.py" />
-        <option value="$PROJECT_DIR$/Node.py" />
         <option value="$PROJECT_DIR$/HexState.py" />
-        <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/HexState1.py" />
         <option value="$PROJECT_DIR$/Node1.py" />
         <option value="$PROJECT_DIR$/main1.py" />
+        <option value="$PROJECT_DIR$/Policy.py" />
+        <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/HexSetting.yaml" />
+        <option value="$PROJECT_DIR$/NeuralNetSetting.yaml" />
+        <option value="$PROJECT_DIR$/Node.py" />
       </list>
     </option>
   </component>
@@ -224,6 +243,16 @@
               <item name="deep-rl-hex" type="b2602c69:ProjectViewProjectNode" />
               <item name="deep-rl-hex" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="deep-rl-hex" type="b2602c69:ProjectViewProjectNode" />
+              <item name="deep-rl-hex" type="462c0819:PsiDirectoryNode" />
+              <item name="hexclient" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="deep-rl-hex" type="b2602c69:ProjectViewProjectNode" />
+              <item name="deep-rl-hex" type="462c0819:PsiDirectoryNode" />
+              <item name="training_data" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -234,7 +263,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="yaml" />
-    <property name="last_opened_file_path" value="$USER_HOME$/Downloads/mopyhex-master/mopyhex-master" />
+    <property name="last_opened_file_path" value="$USER_HOME$/deep-rl-hex1" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
   </component>
@@ -255,7 +284,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.main1">
+  <component name="RunManager" selected="Python.main">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="deep-rl-hex" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -329,8 +358,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.main1" />
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.main1" />
         <item itemvalue="Python.policy" />
       </list>
     </recent_temporary>
@@ -359,15 +388,14 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1295" height="695" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.20566802" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.21214575" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.35523978" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.3250444" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39964476" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.3285968" />
@@ -380,17 +408,17 @@
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="SciView" order="3" weight="0.32955465" />
+      <window_info anchor="right" id="SciView" order="3" weight="0.35465586" />
       <window_info anchor="right" id="Database" order="4" />
     </layout>
     <layout-to-restore>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.20242915" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.20890689" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.22024867" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.38010657" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39964476" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.3285968" />
@@ -403,7 +431,7 @@
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="SciView" order="3" weight="0.32955465" />
+      <window_info anchor="right" id="SciView" order="3" weight="0.35465586" />
       <window_info anchor="right" id="Database" order="4" />
     </layout-to-restore>
   </component>
@@ -419,9 +447,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="17">
           <caret line="1" lean-forward="true" selection-start-line="1" selection-end-line="1" />
-          <folding>
-            <marker date="1541199389828" expanded="true" signature="32:37" ph="..." />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -429,13 +454,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state>
           <caret column="13" selection-start-column="13" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/policy.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="274">
-          <caret line="20" column="3" selection-start-line="20" selection-start-column="3" selection-end-line="20" selection-end-column="3" />
         </state>
       </provider>
     </entry>
@@ -453,88 +471,113 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Node1.py" />
+    <entry file="file://$PROJECT_DIR$/HexState1.py" />
+    <entry file="file://$PROJECT_DIR$/main1.py" />
     <entry file="file://C:/ProgramData/Miniconda3/Lib/random.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="99">
-          <caret line="257" selection-start-line="257" selection-end-line="257" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="47" column="27" lean-forward="true" selection-start-line="47" selection-start-column="27" selection-end-line="47" selection-end-column="27" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Node.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="200">
-          <caret line="16" column="23" lean-forward="true" selection-start-line="16" selection-start-column="23" selection-end-line="16" selection-end-column="23" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/HexState.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="37" column="22" selection-start-line="37" selection-start-column="22" selection-end-line="37" selection-end-column="22" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Node1.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-417">
-          <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/HexState1.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="283">
-          <caret line="83" column="17" selection-start-line="83" selection-start-column="17" selection-end-line="83" selection-end-column="17" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-            <marker date="1542111738765" expanded="true" signature="3919:4101" ph="..." />
-          </folding>
+          <caret line="255" selection-start-line="255" selection-end-line="255" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/GameSetting.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="51">
-          <caret line="3" column="18" selection-start-line="3" selection-start-column="18" selection-end-line="3" selection-end-column="18" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="-377">
+          <caret line="3" column="13" selection-start-line="3" selection-start-column="13" selection-end-line="3" selection-end-column="13" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main1.py">
+    <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="227">
-          <caret line="89" column="20" selection-start-line="89" selection-start-column="20" selection-end-line="89" selection-end-column="20" />
-          <folding>
-            <element signature="e#44#63#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="40">
+          <caret line="94" column="24" selection-start-line="94" selection-start-column="24" selection-end-line="94" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/hexclient/server.crt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="406">
+          <caret line="31" column="25" lean-forward="true" selection-start-line="31" selection-start-column="25" selection-end-line="31" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/HexState.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1190">
+          <caret line="70" selection-start-line="70" selection-end-line="70" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/ProgramData/Miniconda3/Lib/site-packages/yaml/scanner.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="219">
+          <caret line="288" selection-start-line="288" selection-end-line="288" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/HexSetting.yaml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="5" selection-start-line="2" selection-start-column="5" selection-end-line="2" selection-end-column="5" />
+        <state>
+          <caret column="4" selection-start-column="4" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/hexclient/BasicClientActor.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="13" column="52" selection-start-line="13" selection-start-column="52" selection-end-line="13" selection-end-column="109" />
+          <folding>
+            <element signature="e#0#51#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/training_data/4n4n4n4n4-1542555747.185574-58VSC">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="6" selection-start-line="6" selection-end-line="6" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/hexclient/BasicClientActorAbs.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="14" column="29" selection-start-line="14" selection-start-column="29" selection-end-line="14" selection-end-column="29" />
+          <folding>
+            <element signature="e#1#36#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/NeuralNetSetting.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="850">
+          <caret line="50" column="31" selection-start-line="50" selection-start-column="31" selection-end-line="50" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Node.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="544">
+          <caret line="32" column="11" selection-start-line="32" selection-start-column="11" selection-end-line="32" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Policy.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="27" column="36" selection-start-line="27" selection-start-column="27" selection-end-line="27" selection-end-column="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/train_neural_net.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-100">
+          <caret line="9" column="13" lean-forward="true" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
+          <folding>
+            <element signature="e#0#22#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

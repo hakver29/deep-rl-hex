@@ -5,7 +5,7 @@ from HexState import *
 from GameSetting import *
 import copy
 from Policy import Policy
-
+import os
 
 def convertIntegerToCoordinate(intMove, boardSize):
     ycoordinate = intMove//boardSize
@@ -92,6 +92,8 @@ def play_game(game_setting, policy=None):
                 state.place_white(move)
                 state.set_turn(2)
 
+            print(state)
+
             if game_setting.verbose == True:
                 if state.toplay == 1:
                     print("Player 2 selects " + str(move) + "\n")
@@ -128,13 +130,16 @@ def append_mcts_result_to_training_data(rootnode, rootstate):
             input[i] = -1
 
 
-    training_data_file.write(",".join(str(int(input)) for input in input)+"|"+",".join(str(target) for target in target)+"|"+"\n")
+    #training_data_file.write(",".join(str(int(input)) for input in input)+"|"+",".join(str(target) for target in target)+"|"+"\n")
 
 
 
 game_setting = GameSetting()
-file_path = training_data_file_path = DATA_DIR+'n'.join(str(dim) for dim in game_setting.network_dimensions)+"-"+str(time.time()+datetime.now().microsecond)+"-"+''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
-training_data_file = open(file_path, "w+")
+#file_path = training_data_file_path = DATA_DIR+'n'.join(str(dim) for dim in game_setting.network_dimensions)+"-"+str(time.time()+datetime.now().microsecond)+"-"+''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
+# training_data_file = open("C:\\Users\\Haakon\\deep-rl-hex\\training_data\\test.txt", "w+")
+#print(os.listdir())
+#print(file_path)
+#training_data_file = open(file_path, "w+")
 """
 state = HexState1(game_setting)
 print(state)
@@ -146,9 +151,9 @@ print(state)
 print(state.winner())
 """
 play_game(game_setting)
-training_data_file.close()
-policy = Policy(game_setting)
-policy.import_all_data_and_train()
-play_game(game_setting,policy=policy)
+#training_data_file.close()
+#policy = Policy(game_setting)
+#policy.import_all_data_and_train()
+#play_game(game_setting,policy=policy)
 
 
