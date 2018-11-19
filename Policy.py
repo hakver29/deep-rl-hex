@@ -24,20 +24,19 @@ class Policy:
 
         #self.model.add(tf.keras.layers.Dense(
 
-        self.model.compile(optimizer=game_setting.optimizer, loss=game_setting.loss_function, metrics=[game_setting.metrics])
+        optimizer = eval("tf.keras.optimizers."+game_setting.optimizer+"(lr="+str(game_setting.learning_rate)+")")
+
+        self.model.compile(optimizer=optimizer, loss=game_setting.loss_function, metrics=[game_setting.metrics])
 
     def select(self, feature_vector, legal_moves):
         feature_vector = np.array(feature_vector)
         loopend = feature_vector.shape[0]
         feature_vector = np.expand_dims(feature_vector, 0)
-        print(feature_vector.shape)
         probability_of_moves = self.model.predict_on_batch(feature_vector)
         for i in range(0,loopend):
             if i not in legal_moves:
                 probability_of_moves[0,i] = -10**6 #Removing all non-legal moves from neural net prediction
 
-        print(type(probability_of_moves))
-        print(probability_of_moves.argmax())
         return probability_of_moves.argmax() #Returning the move with highest probability score
                                                             #If several moves have equal probability, return random
 
@@ -46,13 +45,17 @@ class Policy:
     def read_all_training_data(self):
         path = DATA_DIR
         files_with_training_data = [f for f in listdir(path) if isfile(join(path, f))]
-        features = targets = []
+        features = []
+        targets = []
         for file_name in files_with_training_data:
             layer_dims = [int(x) for x in file_name.split("-")[0].split('n')]
             if layer_dims[0] == self.game_setting.size ** 2 and layer_dims[len(layer_dims) - 1] == self.game_setting.size ** 2:
                 training_data = self.import_data_from_single_file(file_name)
                 features = features + training_data[0]
                 targets = targets + training_data[1]
+
+        assert len(features) > 10
+        assert len(targets) > 10
 
         return features, targets
 

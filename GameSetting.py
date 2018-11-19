@@ -25,13 +25,17 @@ class GameSetting:
         self.loss_function = neural_net_config['loss_function']
         self.metrics = eval("tf.keras.metrics."+neural_net_config['metrics'])
         self.epochs = int(neural_net_config['epochs'])
+        self.learning_rate = float(neural_net_config['learning_rate'])
 
     def read_network_dimensions(self, hidden_layer_dims):
+
         network_dimensions = [self.size**2]
 
-        if (hidden_layer_dims is ""):
+        if type(hidden_layer_dims) == int:
+            network_dimensions.append(hidden_layer_dims)
+        elif (hidden_layer_dims is ""):
             network_dimensions.append(self.default_hidden_layer_dims(hidden_layer_dims))
-        else:
+        elif type(hidden_layer_dims) != int:
             for i in str.split(hidden_layer_dims,","):
                 i = int(i)
                 if i >0:
