@@ -61,7 +61,7 @@ def tree_search(rootstate, itermax, verbose=False, policy=None):
         # Backpropagation
         while node != None:
             node.visits += 1
-            if node.toplay == state.winner():
+            if node.toplay != state.winner():
                 node.wins += 1
             node = node.parentNode
 

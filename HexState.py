@@ -25,8 +25,8 @@ class HexState1:
         Also create our union find structures for win checking.
         """
         self.size = gamesetting.size
-        self.toplay = self.PLAYERS["white"]
-        #self.toplay = self.PLAYERS[gamesetting.P]
+        #self.toplay = self.PLAYERS["white"]
+        self.toplay = self.PLAYERS[gamesetting.P]
         self.board = np.zeros((gamesetting.size, gamesetting.size))
         self.gamesetting = gamesetting
         self.white_groups = unionfind()
