@@ -26,6 +26,7 @@ class GameSetting:
         self.metrics = eval("tf.keras.metrics."+neural_net_config['metrics'])
         self.epochs = int(neural_net_config['epochs'])
         self.learning_rate = float(neural_net_config['learning_rate'])
+        self.epsilon = float(neural_net_config['epsilon'])
 
     def read_network_dimensions(self, hidden_layer_dims):
 

@@ -75,6 +75,12 @@ class Policy:
         feature_vectors = np.array([np.array(feature_vector) for feature_vector in feature_vectors])
         targets = np.array([np.array(target) for target in targets])
 
+        for feature_vector in feature_vectors:
+            feature_vector = np.random.choice(feature_vector,len(feature_vectors)//2)
+
+        for target in targets:
+            target = np.random.choice(target, len(feature_vectors) // 2)
+
         self.model.fit(feature_vectors, targets, epochs=self.game_setting.epochs, batch_size=batch_size)
         #tf.keras.utils.plot_model(self.model, to_file='model.png')
 

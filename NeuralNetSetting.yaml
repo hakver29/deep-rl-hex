@@ -32,7 +32,7 @@ output_function: "softmax"
 #Ex "hidden_layers =" will default to a hardcoded set of parameters that set an appropriate number of hidden layers
 #with an appropriate number of neurons relative to the board size.
 
-hidden_layers: 0,0,0
+hidden_layers: 100
 
 
 #SGD
@@ -74,4 +74,8 @@ metrics: categorical_accuracy
 
 #This parameter defines how many epochs should be run for each training_batch
 
-epochs: 5
+epochs: 20
+
+learning_rate: 0.05
+
+epsilon: 0.3
