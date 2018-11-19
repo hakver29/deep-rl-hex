@@ -1,5 +1,4 @@
 import random
-
 import numpy as np
 import tensorflow as tf
 from os import listdir
@@ -29,13 +28,13 @@ class Policy:
 
     def select(self, feature_vector, legal_moves):
         feature_vector = np.array(feature_vector)
-        print(feature_vector.shape)
+        loopend = feature_vector.shape[0]
         feature_vector = np.expand_dims(feature_vector, 0)
         print(feature_vector.shape)
         probability_of_moves = self.model.predict_on_batch(feature_vector)
-        for i in range(0,len(probability_of_moves)):
+        for i in range(0,loopend):
             if i not in legal_moves:
-                probability_of_moves[i] = 0 #Removing all non-legal moves from neural net prediction
+                probability_of_moves[0,i] = -10**6 #Removing all non-legal moves from neural net prediction
 
         print(type(probability_of_moves))
         print(probability_of_moves.argmax())
@@ -51,13 +50,13 @@ class Policy:
         for file_name in files_with_training_data:
             layer_dims = [int(x) for x in file_name.split("-")[0].split('n')]
             if layer_dims[0] == self.game_setting.size ** 2 and layer_dims[len(layer_dims) - 1] == self.game_setting.size ** 2:
-                training_data = self.import_data(file_name)
+                training_data = self.import_data_from_single_file(file_name)
                 features = features + training_data[0]
                 targets = targets + training_data[1]
 
         return features, targets
 
-    def import_data(self, file_name):
+    def import_data_from_single_file(self, file_name):
         lines = open(DATA_DIR + file_name)
         features = []
         targets = []
@@ -74,6 +73,7 @@ class Policy:
         targets = np.array([np.array(target) for target in targets])
 
         self.model.fit(feature_vectors, targets, epochs=self.game_setting.epochs, batch_size=batch_size)
+        #tf.keras.utils.plot_model(self.model, to_file='model.png')
 
     def import_all_data_and_train(self):
         features, targets = self.read_all_training_data()
