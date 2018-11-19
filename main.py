@@ -4,68 +4,92 @@ from Node import *
 from HexState import *
 from GameSetting import *
 import copy
-from Policy import *
-import train_neural_net
-import keras
-from definitions import MODEL_DIR
+from Policy import Policy
 import os
-from hexclient.BasicClientActor import BasicClientActor as BSA
+
+def convertIntegerToCoordinate(intMove, boardSize):
+    ycoordinate = intMove//boardSize
+    xcoordinate = intMove%boardSize
+    return xcoordinate,ycoordinate
+
+
+def convertCoordinateToInteger(move, boardSize):
+    return move[1]*boardSize + move[0]
+
+def convertFeatureVectorToFormat(feature_vector, toplay):
+    for i in range(0,len(feature_vector)):
+        if feature_vector[i] == float(toplay):
+            feature_vector[i] = 1
+        elif feature_vector[i] != 0.0:
+            feature_vector[i] = -1
+
+    return feature_vector
 
 def tree_search(rootstate, itermax, verbose=False, policy=None):
     rootnode = Node1(state=rootstate)
-    if policy is None:
-        for i in range(itermax):
-            node = rootnode
-            state = copy.deepcopy(rootstate)
+    for i in range(itermax):
+        node = rootnode
+        state = copy.deepcopy(rootstate)
 
-            """
-            Selection: start from root R and select successive child nodes until a leaf node L is reached. The root is the 
-            current game state and a leaf is any node from which no simulation (playout) has yet been initiated. The 
-            section below says more about a way of biasing choice of child nodes that lets the game tree expand towards the 
-            most promising moves, which is the essence of Monte Carlo tree search.
-    
-            Expansion: unless L ends the game decisively (e.g. win/loss/draw) for either player, create one (or more) child 
-            nodes and choose node C from one of them. Child nodes are any valid moves from the game position defined by L.
-    
-            Simulation: complete one random playout from node C. This step is sometimes also called playout or rollout. A 
-            playout may be as simple as choosing uniform random moves until the game is decided (for example in chess, the 
-            game is won, lost, or drawn).
-    
-            Backpropagation: use the result of the playout to update information in the nodes on the path from C to R.
-    
-            -Wikipedia
-            """
+        """
+        Selection: start from root R and select successive child nodes until a leaf node L is reached. The root is the 
+        current game state and a leaf is any node from which no simulation (playout) has yet been initiated. The 
+        section below says more about a way of biasing choice of child nodes that lets the game tree expand towards the 
+        most promising moves, which is the essence of Monte Carlo tree search.
 
-            # Selection
-            while node.untried_moves == [] and node.childNodes != []:
-                node = node.select_child()
-                state.play(node.move)
+        Expansion: unless L ends the game decisively (e.g. win/loss/draw) for either player, create one (or more) child 
+        nodes and choose node C from one of them. Child nodes are any valid moves from the game position defined by L.
 
-            # Expansion
-            if node.untried_moves != []:
-                move = random.choice(node.untried_moves)
-                state.play(move)
-                node = node.add_child(move, state)
+        Simulation: complete one random playout from node C. This step is sometimes also called playout or rollout. A 
+        playout may be as simple as choosing uniform random moves until the game is decided (for example in chess, the 
+        game is won, lost, or drawn).
 
-            # Simulation
+        Backpropagation: use the result of the playout to update information in the nodes on the path from C to R.
+
+        -Wikipedia
+        """
+
+        # Selection
+        while node.untried_moves == [] and node.childNodes != []:
+            node = node.select_child()
+            state.play(node.move)
+
+        # Expansion
+        if node.untried_moves != []:
+            move = random.choice(node.untried_moves)
+            state.play(move)
+            node = node.add_child(move, state)
+
+        # Simulation
+        if policy is None:
+            # Simulation with random, vanilla MCTS if no neural net policy is defined.
             while state.winner() == 0:
                 state.play(random.choice(state.moves()))
+        else:
+            #If a neural net policy is defined, we let the neural net do the rollouts / simulations
+            while state.winner() == 0:
+                random_num = random.uniform(0, 1)
+                #If our random number exceeds epsilon, we let the ANN pick move. If not, the move is random.
+                if random_num>game_setting.epsilon:
+                    legal_moves = [convertCoordinateToInteger(move, game_setting.size) for move in state.moves()]
+                    flattened_move = policy.select(convertFeatureVectorToFormat(rootstate.board.flatten('F'), rootstate.toplay),
+                                            legal_moves)
+                    assert (flattened_move in legal_moves)
+                    state.play(convertIntegerToCoordinate(flattened_move, game_setting.size))
+                else:
+                    state.play(random.choice(state.moves()))
 
-            # Backpropagation
-            while node != None:
-                node.visits += 1
-                if node.toplay != state.winner():
-                    node.wins += 1
-                node = node.parentNode
+        # Backpropagation
+        while node != None:
+            node.visits += 1
+            if node.toplay != state.winner():
+                node.wins += 1
+            node = node.parentNode
 
-        if game_setting.verbose == True:
-            print(rootnode.children_to_string())
-        append_mcts_result_to_training_data(rootnode, rootstate)
-        return max(rootnode.childNodes, key=lambda c: c.visits).move
-    else:
-        legal_moves = [convertCoordinateToInteger(move, game_setting.size) for move in rootnode.untried_moves]
-        intMove = policy.select(rootstate.board.flatten('F'), legal_moves)
-        return convertIntegerToCoordinate(intMove,game_setting.size)
+    if game_setting.verbose == True:
+        print(rootnode.children_to_string())
+    append_result_to_training_data(rootnode, rootstate)
+    return max(rootnode.childNodes, key=lambda c: c.visits).move
 
 
 def play_game(game_setting, policy=None):
@@ -106,27 +130,23 @@ def play_game(game_setting, policy=None):
     print(player_wins)
 
 
-def append_mcts_result_to_training_data(rootnode, rootstate):
+
+def append_result_to_training_data(rootnode, rootstate):
     target = [0] * game_setting.size**2
 
     for child_node in rootnode.childNodes:
         move = child_node.move[1]*game_setting.size+child_node.move[0]
         target[move] = child_node.visits/rootnode.visits
 
-    input = rootstate.board.flatten('F')
-    for i in range(0,len(input)):
-        if input[i] == float(rootstate.toplay):
-            input[i] = 1
-        elif input[i] != 0.0:
-            input[i] = -1
+    feature_vector = convertFeatureVectorToFormat(rootstate.board.flatten('F'),rootstate.toplay)
 
-    #training_data_file.write(",".join(str(int(input)) for input in input)+"|"+",".join(str(target) for target in target)+"|"+"\n")
+    training_data_file.write(",".join(str(int(input)) for input in feature_vector)+"|"+",".join(str(target) for target in target)+"|"+"\n")
 
 
 
 game_setting = GameSetting()
-#file_path = training_data_file_path = DATA_DIR+'n'.join(str(dim) for dim in game_setting.network_dimensions)+"-"+str(time.time()+datetime.now().microsecond)+"-"+''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
-#training_data_file = open(file_path, "w+")
+file_path = training_data_file_path = DATA_DIR+'n'.join(str(dim) for dim in game_setting.network_dimensions)+"-"+str(time.time()+datetime.now().microsecond)+"-"+''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
+training_data_file = open(file_path, "w+")
 """
 state = HexState1(game_setting)
 print(state)
@@ -137,19 +157,8 @@ print(state.place_black((0,1)))
 print(state)
 print(state.winner())
 """
-#play_game(game_setting)
-#training_data_file.close()
+play_game(game_setting)
 policy = Policy(game_setting)
-#policy.import_all_data_and_train()
-#play_game(game_setting,policy=policy)
-
-x,y = train_neural_net.read_training_data(game_setting.size)
-policy.train(x, y, batch_size = 50)
-#client = BSA()
-#client.connect_to_server()
-
-M = keras.models.load_model(ROOT_DIR + "model")
-#model.compile(loss='mean_squared_error',
-#            optimizer='Adam',
-#            metrics=['accuracy'])
-
+policy.import_all_data_and_train()
+play_game(game_setting,policy=policy)
+training_data_file.close()
