@@ -143,8 +143,8 @@ class HexState1:
         """
         Print an ascii representation of the game board.
         """
-        white = 'O'
-        black = '@'
+        white = self.gamesetting.player_symbols[0]
+        black = self.gamesetting.player_symbols[1]
         empty = '.'
         ret = '\n'
         coord_size = len(str(self.size))

@@ -18,7 +18,7 @@ def convertCoordinateToInteger(move, boardSize):
 
 
 
-def tree_search(rootstate, itermax, verbose=False, policy=None):
+def tree_search(rootstate, itermax, verbose=False, policy=None, debug=False):
     rootnode = Node1(state=rootstate)
 
     for i in range(itermax):
@@ -48,30 +48,63 @@ def tree_search(rootstate, itermax, verbose=False, policy=None):
             node = node.select_child()
             state.play(node.move)
 
+        #print(" ")
+
+        if debug == True:
+            print("Starting rollout from state below, after completing selection phase.")
+            print(state)
+
+        #print(" ")
+
         # Expansion
         if node.untried_moves != []:
             move = random.choice(node.untried_moves)
             state.play(move)
             node = node.add_child(move, state)
 
+        if debug == True:
+            print("Randomly chose " + str(move) + " among the untried moves, in expansion phase.")
+            print(state)
+
+        #print(" ")
+
         # Simulation
         while state.winner() == 0:
+
+            random_move = random.choice(state.moves())
             state.play(random.choice(state.moves()))
+            if debug == True:
+                print("Player " + str(game_setting.player_symbols[state.toplay-1]) + " just played " + str(random_move) + ".")
+                print(state)
+                print(" ")
+
+        winner = {1: "white", 2: "black"}
+
+        if debug is True:
+            print("Board above is a win for " + winner[state.winner()])
+            print(" ")
 
         # Backpropagation
         while node != None:
             node.visits += 1
-            if rootstate.turn() == state.winner():
+            if node.toplay == state.winner():
                 node.wins += 1
+                if debug is True:
+                    if node.move is not None:
+                        print("Adding win to node with move " + str(node.move) + ". Current statistic is " + str(node.wins) + "/" + str(node.visits))
+                    else:
+                        print("Adding win to rootnode. Current statistic is " + str(node.wins) + "/" + str(node.visits))
+                    #print(" ")
             node = node.parentNode
 
     if game_setting.verbose == True:
         print(rootnode.children_to_string())
 
-    if policy is None:
+    return max(rootnode.childNodes, key=lambda c: c.visits).move
+    if policy is None and training_data_file is not None:
         append_mcts_result_to_training_data(rootnode, rootstate)
         return max(rootnode.childNodes, key=lambda c: c.visits).move
-    else:
+    elif policy is not None:
         intMove = policy.select(rootstate.board.flatten(), [convertCoordinateToInteger(childNode.move, game_setting.size) for childNode in rootnode.childNodes])
         return convertIntegerToCoordinate(intMove,game_setting.size)
 
@@ -93,6 +126,7 @@ def play_game(game_setting, policy=None):
                 state.set_turn(2)
 
             if game_setting.verbose == True:
+                print(state)
                 if state.toplay == 1:
                     print("Player 2 selects " + str(move) + "\n")
                 elif state.toplay == 2:
@@ -133,8 +167,9 @@ def append_mcts_result_to_training_data(rootnode, rootstate):
 
 
 game_setting = GameSetting()
-file_path = training_data_file_path = DATA_DIR+'n'.join(str(dim) for dim in game_setting.network_dimensions)+"-"+str(time.time()+datetime.now().microsecond)+"-"+''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
-training_data_file = open(file_path, "w+")
+#file_path = training_data_file_path = DATA_DIR+'n'.join(str(dim) for dim in game_setting.network_dimensions)+"-"+str(time.time()+datetime.now().microsecond)+"-"+''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
+training_data_file = None
+#training_data_file = open(file_path, "w+")
 """
 state = HexState1(game_setting)
 print(state)
@@ -146,9 +181,9 @@ print(state)
 print(state.winner())
 """
 play_game(game_setting)
-training_data_file.close()
-policy = Policy(game_setting)
-policy.import_all_data_and_train()
-play_game(game_setting,policy=policy)
+#training_data_file.close()
+#policy = Policy(game_setting)
+#policy.import_all_data_and_train()
+#play_game(game_setting,policy=policy)
 
 

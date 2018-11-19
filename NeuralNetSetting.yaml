@@ -62,7 +62,6 @@ optimizer: Adam
 
 loss_function:  categorical_crossentropy
 
-
 #binary_accuracy
 #categorical_accuracy
 #sparse_categorical_accuracy
@@ -70,7 +69,6 @@ loss_function:  categorical_crossentropy
 #sparse_top_k_categorical_accuracy
 
 metrics: categorical_accuracy
-
 
 #This parameter defines how many epochs should be run for each training_batch
 

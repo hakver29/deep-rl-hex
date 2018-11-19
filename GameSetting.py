@@ -17,6 +17,8 @@ class GameSetting:
         self.M = game_config["M"]
         self.verbose = game_config["verbose"]
         self.size = game_config["size"]
+        self.player_symbols = self.read_player_symbols(game_config['player_symbols'])
+
         self.activation_function = neural_net_config['activation_function']
         self.hidden_function = neural_net_config['hidden_function']
         self.output_function = neural_net_config['output_function']
@@ -41,6 +43,14 @@ class GameSetting:
 
         network_dimensions.append(self.size**2)
         return network_dimensions
+
+    def read_player_symbols(self, symbolString):
+        symbols = [s.strip() for s in symbolString.split(",")]
+        assert len(symbols) == 2
+        for symbol in symbols:
+            assert len(symbol) == 1
+
+        return symbols
 
     def default_hidden_layer_dims(self, hidden_layer_dims):
         #Here we need to hardcode an appropriate hidden layer configuration which works as default
