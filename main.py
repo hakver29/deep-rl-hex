@@ -6,6 +6,7 @@ from GameSetting import *
 import copy
 from Policy import Policy
 import os
+from hexclient.BasicClientActor import BasicClientActor as BSA
 
 def convertIntegerToCoordinate(intMove, boardSize):
     ycoordinate = intMove//boardSize
@@ -27,27 +28,28 @@ def convertFeatureVectorToFormat(feature_vector, toplay):
 
 def tree_search(rootstate, itermax, verbose=False, policy=None):
     rootnode = Node1(state=rootstate)
-    for i in range(itermax):
-        node = rootnode
-        state = copy.deepcopy(rootstate)
+    if policy is None:
+        for i in range(itermax):
+            node = rootnode
+            state = copy.deepcopy(rootstate)
 
-        """
-        Selection: start from root R and select successive child nodes until a leaf node L is reached. The root is the 
-        current game state and a leaf is any node from which no simulation (playout) has yet been initiated. The 
-        section below says more about a way of biasing choice of child nodes that lets the game tree expand towards the 
-        most promising moves, which is the essence of Monte Carlo tree search.
-
-        Expansion: unless L ends the game decisively (e.g. win/loss/draw) for either player, create one (or more) child 
-        nodes and choose node C from one of them. Child nodes are any valid moves from the game position defined by L.
-
-        Simulation: complete one random playout from node C. This step is sometimes also called playout or rollout. A 
-        playout may be as simple as choosing uniform random moves until the game is decided (for example in chess, the 
-        game is won, lost, or drawn).
-
-        Backpropagation: use the result of the playout to update information in the nodes on the path from C to R.
-
-        -Wikipedia
-        """
+            """
+            Selection: start from root R and select successive child nodes until a leaf node L is reached. The root is the 
+            current game state and a leaf is any node from which no simulation (playout) has yet been initiated. The 
+            section below says more about a way of biasing choice of child nodes that lets the game tree expand towards the 
+            most promising moves, which is the essence of Monte Carlo tree search.
+    
+            Expansion: unless L ends the game decisively (e.g. win/loss/draw) for either player, create one (or more) child 
+            nodes and choose node C from one of them. Child nodes are any valid moves from the game position defined by L.
+    
+            Simulation: complete one random playout from node C. This step is sometimes also called playout or rollout. A 
+            playout may be as simple as choosing uniform random moves until the game is decided (for example in chess, the 
+            game is won, lost, or drawn).
+    
+            Backpropagation: use the result of the playout to update information in the nodes on the path from C to R.
+    
+            -Wikipedia
+            """
 
         # Selection
         while node.untried_moves == [] and node.childNodes != []:
@@ -79,12 +81,12 @@ def tree_search(rootstate, itermax, verbose=False, policy=None):
                 else:
                     state.play(random.choice(state.moves()))
 
-        # Backpropagation
-        while node != None:
-            node.visits += 1
-            if node.toplay != state.winner():
-                node.wins += 1
-            node = node.parentNode
+            # Backpropagation
+            while node != None:
+                node.visits += 1
+                if node.toplay != state.winner():
+                    node.wins += 1
+                node = node.parentNode
 
     if game_setting.verbose == True:
         print(rootnode.children_to_string())
@@ -158,7 +160,13 @@ print(state)
 print(state.winner())
 """
 play_game(game_setting)
+training_data_file.close()
 policy = Policy(game_setting)
 policy.import_all_data_and_train()
 play_game(game_setting,policy=policy)
-training_data_file.close()
+
+
+client = BSA()
+#client = BSA.BasicClientActor.connect_to_server()
+print("yolo")
+#client.connect()
