@@ -75,3 +75,5 @@ metrics: categorical_accuracy
 #This parameter defines how many epochs should be run for each training_batch
 
 epochs: 5
+
+learning_rate: 0.1
