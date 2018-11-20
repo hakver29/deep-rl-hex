@@ -1,6 +1,8 @@
 from hexclient.BasicClientActorAbs import BasicClientActorAbs
 import math
-from main import *
+#from main import *
+from Policy import *
+from Node import *
 from HexState import *
 
 class BasicClientActor(BasicClientActorAbs):
@@ -146,6 +148,6 @@ class BasicClientActor(BasicClientActorAbs):
         print('Action: ' + str(illegal_action))
 
 
-if __name__ ==  '__main__':
-    bsa = BasicClientActor(verbose=True)
-    bsa.connect_to_server()
+#if __name__ ==  '__main__':
+#    bsa = BasicClientActor(verbose=True)
+#    bsa.connect_to_server()
