@@ -28,68 +28,68 @@ def convertFeatureVectorToFormat(feature_vector, toplay):
 
 def tree_search(rootstate, itermax, verbose=False, policy=None):
     rootnode = Node1(state=rootstate)
+    for i in range(itermax):
+        node = rootnode
+        state = copy.deepcopy(rootstate)
+
+        """
+        Selection: start from root R and select successive child nodes until a leaf node L is reached. The root is the 
+        current game state and a leaf is any node from which no simulation (playout) has yet been initiated. The 
+        section below says more about a way of biasing choice of child nodes that lets the game tree expand towards the 
+        most promising moves, which is the essence of Monte Carlo tree search.
+
+        Expansion: unless L ends the game decisively (e.g. win/loss/draw) for either player, create one (or more) child 
+        nodes and choose node C from one of them. Child nodes are any valid moves from the game position defined by L.
+
+        Simulation: complete one random playout from node C. This step is sometimes also called playout or rollout. A 
+        playout may be as simple as choosing uniform random moves until the game is decided (for example in chess, the 
+        game is won, lost, or drawn).
+
+        Backpropagation: use the result of the playout to update information in the nodes on the path from C to R.
+
+        -Wikipedia
+        """
+
+    # Selection
+    while node.untried_moves == [] and node.childNodes != []:
+        node = node.select_child()
+        state.play(node.move)
+
+    # Expansion
+    if node.untried_moves != []:
+        move = random.choice(node.untried_moves)
+        state.play(move)
+        node = node.add_child(move, state)
+
+    # Simulation
     if policy is None:
-        for i in range(itermax):
-            node = rootnode
-            state = copy.deepcopy(rootstate)
-
-            """
-            Selection: start from root R and select successive child nodes until a leaf node L is reached. The root is the 
-            current game state and a leaf is any node from which no simulation (playout) has yet been initiated. The 
-            section below says more about a way of biasing choice of child nodes that lets the game tree expand towards the 
-            most promising moves, which is the essence of Monte Carlo tree search.
-    
-            Expansion: unless L ends the game decisively (e.g. win/loss/draw) for either player, create one (or more) child 
-            nodes and choose node C from one of them. Child nodes are any valid moves from the game position defined by L.
-    
-            Simulation: complete one random playout from node C. This step is sometimes also called playout or rollout. A 
-            playout may be as simple as choosing uniform random moves until the game is decided (for example in chess, the 
-            game is won, lost, or drawn).
-    
-            Backpropagation: use the result of the playout to update information in the nodes on the path from C to R.
-    
-            -Wikipedia
-            """
-
-        # Selection
-        while node.untried_moves == [] and node.childNodes != []:
-            node = node.select_child()
-            state.play(node.move)
-
-        # Expansion
-        if node.untried_moves != []:
-            move = random.choice(node.untried_moves)
-            state.play(move)
-            node = node.add_child(move, state)
-
-        # Simulation
-        if policy is None:
-            # Simulation with random, vanilla MCTS if no neural net policy is defined.
-            while state.winner() == 0:
+        # Simulation with random, vanilla MCTS if no neural net policy is defined.
+        while state.winner() == 0:
+            state.play(random.choice(state.moves()))
+    else:
+        #If a neural net policy is defined, we let the neural net do the rollouts / simulations
+        while state.winner() == 0:
+            random_num = random.uniform(0, 1)
+            #If our random number exceeds epsilon, we let the ANN pick move. If not, the move is random.
+            if random_num>game_setting.epsilon:
+                legal_moves = [convertCoordinateToInteger(move, game_setting.size) for move in state.moves()]
+                flattened_move = policy.select(convertFeatureVectorToFormat(rootstate.board.flatten('F'), rootstate.toplay),
+                                        legal_moves)
+                assert (flattened_move in legal_moves)
+                state.play(convertIntegerToCoordinate(flattened_move, game_setting.size))
+            else:
                 state.play(random.choice(state.moves()))
-        else:
-            #If a neural net policy is defined, we let the neural net do the rollouts / simulations
-            while state.winner() == 0:
-                random_num = random.uniform(0, 1)
-                #If our random number exceeds epsilon, we let the ANN pick move. If not, the move is random.
-                if random_num>game_setting.epsilon:
-                    legal_moves = [convertCoordinateToInteger(move, game_setting.size) for move in state.moves()]
-                    flattened_move = policy.select(convertFeatureVectorToFormat(rootstate.board.flatten('F'), rootstate.toplay),
-                                            legal_moves)
-                    assert (flattened_move in legal_moves)
-                    state.play(convertIntegerToCoordinate(flattened_move, game_setting.size))
-                else:
-                    state.play(random.choice(state.moves()))
 
-            # Backpropagation
-            while node != None:
-                node.visits += 1
-                if node.toplay != state.winner():
-                    node.wins += 1
-                node = node.parentNode
+    # Backpropagation
+    while node != None:
+        node.visits += 1
+        if node.toplay != state.winner():
+            node.wins += 1
+        node = node.parentNode
 
     if game_setting.verbose == True:
         print(rootnode.children_to_string())
+
     append_result_to_training_data(rootnode, rootstate)
     return max(rootnode.childNodes, key=lambda c: c.visits).move
 
@@ -160,17 +160,16 @@ print(state)
 print(state.winner())
 """
 play_game(game_setting)
-training_data_file.close()
 policy = Policy(game_setting)
 policy.import_all_data_and_train()
 play_game(game_setting,policy=policy)
 
 
-client = BSA()
+#client = BSA()
 #client = BSA.BasicClientActor.connect_to_server()
-print("yolo")
+#print("yolo")
 #client.connect()
 #print("yolo")
-client.connect_to_server()
+#client.connect_to_server()
 
 

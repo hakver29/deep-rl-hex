@@ -60,7 +60,7 @@ optimizer: Adam
 #poisson
 #cosine_proximity
 
-loss_function:  categorical_crossentropy
+loss_function:  mean_squared_error
 
 
 #binary_accuracy
@@ -70,7 +70,6 @@ loss_function:  categorical_crossentropy
 #sparse_top_k_categorical_accuracy
 
 metrics: categorical_accuracy
-
 
 #This parameter defines how many epochs should be run for each training_batch
 
