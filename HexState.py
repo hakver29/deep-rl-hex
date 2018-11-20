@@ -30,6 +30,7 @@ class HexState1:
             self.toplay = self.PLAYERS[gamesetting.P]
             self.board = np.zeros((gamesetting.size, gamesetting.size))
         else:
+            keith_state = list(keith_state)
             self.board = np.reshape(keith_state[1:25], (5, 5))
             players = {1: "white", 2: "black"}
             self.toplay = self.PLAYERS[players[keith_state[0]]]

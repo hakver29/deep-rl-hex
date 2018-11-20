@@ -21,7 +21,9 @@ class BasicClientActor(BasicClientActorAbs):
 
         # This is an example player who picks random moves. REMOVE THIS WHEN YOU ADD YOUR OWN CODE !!
         #next_move = tuple(self.pick_random_free_cell(state, size=int(math.sqrt(len(state)-1))))
+
         game_setting = GameSetting()
+        # Her blir ikke player initialisert i game_setting
         policy = Policy(game_setting)
         hexstate = HexState1(gamesetting = game_setting, keith_state = state)
         rootnode = Node1(state=hexstate)
