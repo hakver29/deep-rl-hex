@@ -8,15 +8,6 @@ from Policy import Policy
 import os
 from hexclient.BasicClientActor import BasicClientActor as BSA
 
-def convertIntegerToCoordinate(intMove, boardSize):
-    ycoordinate = intMove//boardSize
-    xcoordinate = intMove%boardSize
-    return xcoordinate,ycoordinate
-
-
-def convertCoordinateToInteger(move, boardSize):
-    return move[1]*boardSize + move[0]
-
 def tree_search(rootstate, itermax, verbose=False, policy=None):
     rootnode = Node1(state=rootstate)
     if policy is None:
@@ -151,7 +142,7 @@ print(state.winner())
 
 client = BSA()
 #client = BSA.BasicClientActor.connect_to_server()
-print("yolo")
-#client.connect()
+#print("yolo")
+client.connect_to_server()
 
 
