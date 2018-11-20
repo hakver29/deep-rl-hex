@@ -29,8 +29,8 @@ class BasicClientActor(BasicClientActorAbs):
         hexstate = HexState1(gamesetting = game_setting, keith_state = state)
         rootnode = Node1(state=hexstate)
         legal_moves = [convertCoordinateToInteger(move, game_setting.size) for move in rootnode.untried_moves]
-        intMove = policy.select(state.board.flatten('F'), legal_moves)
-        next_move = intMove
+        intMove = policy.select(hexstate.board.flatten('F'), legal_moves)
+        next_move = convertIntegerToCoordinate(intMove, 5)
 
         #############################
         #
