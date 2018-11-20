@@ -8,24 +8,6 @@ from Policy import Policy
 import os
 from hexclient.BasicClientActor import BasicClientActor as BSA
 
-def convertIntegerToCoordinate(intMove, boardSize):
-    ycoordinate = intMove//boardSize
-    xcoordinate = intMove%boardSize
-    return xcoordinate,ycoordinate
-
-
-def convertCoordinateToInteger(move, boardSize):
-    return move[1]*boardSize + move[0]
-
-def convertFeatureVectorToFormat(feature_vector, toplay):
-    for i in range(0,len(feature_vector)):
-        if feature_vector[i] == float(toplay):
-            feature_vector[i] = 1
-        elif feature_vector[i] != 0.0:
-            feature_vector[i] = -1
-
-    return feature_vector
-
 def tree_search(rootstate, itermax, verbose=False, policy=None):
     rootnode = Node1(state=rootstate)
     for i in range(itermax):
@@ -72,11 +54,11 @@ def tree_search(rootstate, itermax, verbose=False, policy=None):
                 random_num = random.uniform(0, 1)
                 #If our random number exceeds epsilon, we let the ANN pick move. If not, the move is random.
                 if random_num>game_setting.epsilon:
-                    legal_moves = [convertCoordinateToInteger(move, game_setting.size) for move in state.moves()]
-                    flattened_move = policy.select(convertFeatureVectorToFormat(rootstate.board.flatten('F'), rootstate.toplay),
+                    legal_moves = [state.convertCoordinateToInteger(move) for move in state.moves()]
+                    flattened_move = policy.select(state.convertFeatureVectorToFormat(rootstate.board.flatten('F'), rootstate.toplay),
                                             legal_moves)
                     assert (flattened_move in legal_moves)
-                    state.play(convertIntegerToCoordinate(flattened_move, game_setting.size))
+                    state.play(state.convertIntegerToCoordinate(flattened_move))
                 else:
                     state.play(random.choice(state.moves()))
 
