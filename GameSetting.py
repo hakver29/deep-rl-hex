@@ -12,6 +12,8 @@ class GameSetting:
         configfile = yaml.load(open(ROOT_DIR+"WhichSetting.yaml"))
         game_config = yaml.load(open(ROOT_DIR+configfile["filename"]))
         neural_net_config = yaml.load(open(ROOT_DIR+"NeuralNetSetting.yaml"))
+        topp_config = yaml.load(open(ROOT_DIR+"ToppSettings.yaml"))
+
         self.G = game_config["G"]
         self.P = game_config["P"]
         self.M = game_config["M"]
@@ -28,6 +30,11 @@ class GameSetting:
         self.learning_rate = float(neural_net_config['learning_rate'])
         self.epsilon = float(neural_net_config['epsilon'])
         self.case_fraction = float(neural_net_config['case_fraction'])
+
+        self.K = int(topp_config['K'])
+        self.topp_G = int(topp_config['G'])
+        self.max_cases = int(topp_config['nr_of_training_cases'])
+        self.topp_epsilon = float(topp_config['epsilon'])
 
     def read_network_dimensions(self, hidden_layer_dims):
 

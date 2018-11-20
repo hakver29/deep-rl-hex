@@ -85,7 +85,8 @@ class Policy:
 
         self.model.fit(feature_vectors, targets, epochs=self.game_setting.epochs, batch_size=batch_size)
         #tf.keras.utils.plot_model(self.model, to_file='model.png')
+        return nr_of_cases
 
-    def import_all_data_and_train(self, max_cases=sys.maxsize):
+    def import_data_and_train(self, max_cases=sys.maxsize):
         features, targets = self.read_all_training_data()
-        self.train(features, targets, max_cases)
+        return self.train(features, targets, max_cases)
