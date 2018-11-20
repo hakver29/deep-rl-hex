@@ -34,10 +34,12 @@ class Topp:
         state = HexState1(self.game_setting)
         while (state.white_groups.connected(1, 2) == False and state.black_groups.connected(1, 2) == False):
             #def select(self, feature_vector, legal_moves, stochastic=False):
-            move = policies[state.toplay-1][0].select(state.board.flatten('F'))
+            move = policies[state.toplay-1][0].select(state.convertFeatureVectorToFormat(state.board.flatten('F')))
             if state.toplay == 2:
                 state.place_black(move)
                 state.set_turn(1)
             elif state.toplay == 1:
                 state.place_white(move)
                 state.set_turn(2)
+
+        print(state)

@@ -154,6 +154,23 @@ class HexState1:
                     moves.append((x,y))
         return moves
 
+    def convertIntegerToCoordinate(self, intMove):
+        ycoordinate = intMove // self.size
+        xcoordinate = intMove % self.size
+        return xcoordinate, ycoordinate
+
+    def convertCoordinateToInteger(self, move):
+        return move[1] * self.size + move[0]
+
+    def convertFeatureVectorToFormat(self, feature_vector, toplay):
+        for i in range(0, len(feature_vector)):
+            if feature_vector[i] == float(toplay):
+                feature_vector[i] = 1
+            elif feature_vector[i] != 0.0:
+                feature_vector[i] = -1
+
+        return feature_vector
+
     def __str__(self):
         """
         Print an ascii representation of the game board.
