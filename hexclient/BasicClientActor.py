@@ -1,4 +1,4 @@
-from BasicClientActorAbs import BasicClientActorAbs
+from hexclient.BasicClientActorAbs import BasicClientActorAbs
 import math
 from main import *
 from HexState import *
@@ -21,8 +21,14 @@ class BasicClientActor(BasicClientActorAbs):
 
         # This is an example player who picks random moves. REMOVE THIS WHEN YOU ADD YOUR OWN CODE !!
         #next_move = tuple(self.pick_random_free_cell(state, size=int(math.sqrt(len(state)-1))))
-        game_setting = HexState1(keith_state = state)
-        next_move = play_game(game_setting, policy=None)
+        game_setting = GameSetting()
+        policy = Policy(game_setting)
+        hexstate = HexState1(gamesetting = game_setting, keith_state = state)
+        rootnode = Node1(state=hexstate)
+        legal_moves = [convertCoordinateToInteger(move, game_setting.size) for move in rootnode.untried_moves]
+        intMove = policy.select(state.board.flatten('F'), legal_moves)
+        next_move = intMove
+
         #############################
         #
         #

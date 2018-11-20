@@ -19,30 +19,21 @@ class HexState1:
 
     neighbor_patterns = ((-1,0), (0,-1), (-1,1), (0,1), (1,0), (1,-1))
 
-    def __init__(self, gamesetting):
+    def __init__(self, gamesetting, keith_state = None):
         """
         Initialize the game board and give white first turn.
         Also create our union find structures for win checking.
         """
         self.size = gamesetting.size
         #self.toplay = self.PLAYERS["white"]
-        self.toplay = self.PLAYERS[gamesetting.P]
-        self.board = np.zeros((gamesetting.size, gamesetting.size))
+        if keith_state == None:
+            self.toplay = self.PLAYERS[gamesetting.P]
+            self.board = np.zeros((gamesetting.size, gamesetting.size))
+        else:
+            self.board = np.reshape(keith_state[1:25], (5, 5))
+            players = {1: "white", 2: "black"}
+            self.toplay = self.PLAYERS[players[keith_state[0]]]
         self.gamesetting = gamesetting
-        self.white_groups = unionfind()
-        self.black_groups = unionfind()
-
-    def __init__(self, keith_state):
-        """
-        Initialize the game board and give white first turn.
-        Also create our union find structures for win checking.
-        """
-        self.size = 5
-        # self.toplay = self.PLAYERS["white"]
-        players = {1:"white", 2: "black"}
-        self.toplay = self.PLAYERS[players[keith_state[0]]]
-        self.board = np.reshape(keith_state[1:25],(5,5))
-        #self.gamesetting = gamesetting
         self.white_groups = unionfind()
         self.black_groups = unionfind()
 
