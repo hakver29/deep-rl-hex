@@ -3,6 +3,8 @@ import math
 from Policy import *
 from Node import *
 from HexState import *
+import keras
+import time
 
 class BasicClientActor(BasicClientActorAbs):
     def __init__(self, IP_address = None,verbose=True):
@@ -21,17 +23,23 @@ class BasicClientActor(BasicClientActorAbs):
         """
 
         # This is an example player who picks random moves. REMOVE THIS WHEN YOU ADD YOUR OWN CODE !!
-        #next_move = tuple(self.pick_random_free_cell(state, size=int(math.sqrt(len(state)-1))))
+        next_move = tuple(self.pick_random_free_cell(state, size=int(math.sqrt(len(state)-1))))
 
         game_setting = GameSetting()
         # Her blir ikke player initialisert i game_setting
+        model = keras.models.load_model(MODEL_DIR + "test1.h5")
+        print("testesttest")
+        model.compile(loss='mean_squared_error',
+                      optimizer='Adam',
+                      metrics=['accuracy'])
+        moves = model.predict(state)
         policy = Policy(game_setting)
         hexstate = HexState1(gamesetting = game_setting, keith_state = state)
         rootnode = Node1(state=hexstate)
         legal_moves = [convertCoordinateToInteger(move, game_setting.size) for move in rootnode.untried_moves]
         intMove = policy.select(hexstate.board.flatten('F'), legal_moves)
         next_move = convertIntegerToCoordinate(intMove, 5)
-
+        #next_move = tuple(self.pick_random_free_cell(state, size=int(math.sqrt(len(state) - 1))))
         #############################
         #
         #

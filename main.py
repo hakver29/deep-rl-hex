@@ -4,7 +4,10 @@ from Node import *
 from HexState import *
 from GameSetting import *
 import copy
-from Policy import Policy
+from Policy import *
+import train_neural_net
+import keras
+from definitions import MODEL_DIR
 import os
 from hexclient.BasicClientActor import BasicClientActor as BSA
 
@@ -121,7 +124,7 @@ def append_mcts_result_to_training_data(rootnode, rootstate):
 
 
 
-#game_setting = GameSetting()
+game_setting = GameSetting()
 #file_path = training_data_file_path = DATA_DIR+'n'.join(str(dim) for dim in game_setting.network_dimensions)+"-"+str(time.time()+datetime.now().microsecond)+"-"+''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
 #training_data_file = open(file_path, "w+")
 """
@@ -136,13 +139,17 @@ print(state.winner())
 """
 #play_game(game_setting)
 #training_data_file.close()
-#policy = Policy(game_setting)
+policy = Policy(game_setting)
 #policy.import_all_data_and_train()
 #play_game(game_setting,policy=policy)
 
-client = BSA()
-#client = BSA.BasicClientActor.connect_to_server()
-#print("yolo")
-client.connect_to_server()
+x,y = train_neural_net.read_training_data(game_setting.size)
+policy.train(x, y, batch_size = 50)
+#client = BSA()
+#client.connect_to_server()
 
+M = keras.models.load_model(ROOT_DIR + "model")
+#model.compile(loss='mean_squared_error',
+#            optimizer='Adam',
+#            metrics=['accuracy'])
 

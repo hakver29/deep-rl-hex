@@ -45,7 +45,7 @@ hidden_layers: 0,0,0
 
 optimizer: Adam
 
-#mean_squared_error
+#
 #mean_absolute_error
 #mean_absolute_percentage_error
 #mean_squared_logarithmic_error
@@ -60,7 +60,7 @@ optimizer: Adam
 #poisson
 #cosine_proximity
 
-loss_function:  categorical_crossentropy
+loss_function: mean_squared_error
 
 
 #binary_accuracy

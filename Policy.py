@@ -3,9 +3,10 @@ import numpy as np
 import tensorflow as tf
 from os import listdir
 from os.path import isfile, join
+import time
 
 from GameSetting import GameSetting
-from definitions import DATA_DIR
+from definitions import DATA_DIR, MODEL_DIR, ROOT_DIR
 
 class Policy:
 
@@ -33,6 +34,8 @@ class Policy:
         loopend = feature_vector.shape[0]
         feature_vector = np.expand_dims(feature_vector, 0)
         probability_of_moves = self.model.predict_on_batch(feature_vector)
+        #probability_of_moves = self.model.predict(feature_vector)
+        #predict(x, batch_size=None, verbose=0, steps=None)
         for i in range(0,loopend):
             if i not in legal_moves:
                 probability_of_moves[0,i] = -10**6 #Removing all non-legal moves from neural net prediction
@@ -76,6 +79,7 @@ class Policy:
         targets = np.array([np.array(target) for target in targets])
 
         self.model.fit(feature_vectors, targets, epochs=self.game_setting.epochs, batch_size=batch_size)
+        self.model.save("model")
         #tf.keras.utils.plot_model(self.model, to_file='model.png')
 
     def import_all_data_and_train(self):
