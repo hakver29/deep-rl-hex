@@ -9,7 +9,7 @@ import os
 from hexclient.BasicClientActor import BasicClientActor as BSA
 import time
 
-def tree_search(rootstate, itermax, verbose=False, policy=None):
+def tree_search(rootstate, itermax, verbose=False, policies=None, save_training=True):
     rootnode = Node1(state=rootstate)
     for i in range(itermax):
         node = rootnode
@@ -45,7 +45,7 @@ def tree_search(rootstate, itermax, verbose=False, policy=None):
             node = node.add_child(move, state)
 
         # Simulation
-        if policy is None:
+        if policies is None:
             # Simulation with random, vanilla MCTS if no neural net policy is defined.
             while state.winner() == 0:
                 state.play(random.choice(state.moves()))
@@ -56,8 +56,8 @@ def tree_search(rootstate, itermax, verbose=False, policy=None):
                 #If our random number exceeds epsilon, we let the ANN pick move. If not, the move is random.
                 if random_num>game_setting.epsilon:
                     legal_moves = [state.convertCoordinateToInteger(move) for move in state.moves()]
-                    flattened_move = policy.select(state.convertFeatureVectorToFormat(rootstate.board.flatten('F'), rootstate.toplay),
-                                            legal_moves, stochastic=True)
+                    flattened_move = policies[state.toplay-1].select(state.convertFeatureVectorToFormat(rootstate.board.flatten('F'), rootstate.toplay),
+                                                     legal_moves)
                     assert (flattened_move in legal_moves)
                     state.play(state.convertIntegerToCoordinate(flattened_move))
                 else:
@@ -73,19 +73,40 @@ def tree_search(rootstate, itermax, verbose=False, policy=None):
     if game_setting.verbose == True:
         print(rootnode.children_to_string())
 
-    append_result_to_training_data(rootnode, rootstate)
+    if save_training:
+        append_result_to_training_data(rootnode, rootstate)
     return max(rootnode.childNodes, key=lambda c: c.visits).move
 
 
-def play_game(game_setting, policy=None):
+def play_game(game_setting, policies=None, bad_mcts=False, bad_vs_good_neural_net=None):
     """
     Spiller et enkelt spill mellom to spillere
     """
+    #Bad mcts mode pits a strong mcts player versus a weak mcts player. The idea is make
+    #training data that teaches ANNs how to not only play vs strong players, but weak
+    #players too. Weak players make random moves in odd corners of the board that the
+    #ANN may respond erratically to.
     player_wins = {"black": 0, "white": 0}
     for i in range(game_setting.G):
         state = HexState1(game_setting)
         while (state.white_groups.connected(1,2) == False and state.black_groups.connected(1,2) == False):
-            move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose, policy=policy)
+            if bad_mcts:
+                if state.toplay == 2:
+                    move = tree_search(rootstate=state, itermax=15000, verbose=game_setting.verbose,
+                                       policies=None, save_training=True)
+                elif state.toplay == 1:
+                    move = tree_search(rootstate=state, itermax=1000, verbose=game_setting.verbose,
+                                       policies=None, save_training=False)
+            elif bad_vs_good_neural_net is not None:
+                #Bad neural net on first index, good neural net on second index
+                if state.toplay == 2:
+                    move = tree_search(rootstate=state, itermax=5000, verbose=game_setting.verbose,
+                                       policies=policies, save_training=True)
+                elif state.toplay == 1:
+                    move = tree_search(rootstate=state, itermax=500, verbose=game_setting.verbose,
+                                       policies=policies, save_training=False)
+            else:
+                move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose, policies=policies)
             if state.toplay == 2:
                 state.place_black(move)
                 state.set_turn(1)
@@ -117,7 +138,7 @@ def play_game(game_setting, policy=None):
 
 
 def append_result_to_training_data(rootnode, rootstate):
-    target = [0] * game_setting.size**2
+    target = [0] * game_setting.nr_of_legal_moves
 
     for child_node in rootnode.childNodes:
         move = child_node.move[1]*game_setting.size+child_node.move[0]
@@ -128,26 +149,30 @@ def append_result_to_training_data(rootnode, rootstate):
     training_data_file.write(",".join(str(int(input)) for input in feature_vector)+"|"+",".join(str(target) for target in target)+"|"+"\n")
 
 
-start_time = time.time()
-game_setting = GameSetting()
+start_time = time.time() #We start counting the time.
+
+game_setting = GameSetting() #Load the game settings.
+
 file_path = training_data_file_path = DATA_DIR+'n'.join(str(dim) for dim in game_setting.network_dimensions)+"-"+str(time.time()+datetime.now().microsecond)+"-"+''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
 training_data_file = open(file_path, "w+")
-"""
-state = HexState1(game_setting)
-print(state)
-print(state.place_white((1,1)))
-print(state.place_black((0,0)))
-print(state.place_white((1,0)))
-print(state.place_black((0,1)))
-print(state)
-print(state.winner())
-"""
-play_game(game_setting)
-policy = Policy(game_setting)
-#policy.import_data_and_train()
-#play_game(game_setting,policy=policy)
 
+play_game(game_setting) #First, we play a vanilla MCTS game
 
+play_game(game_setting, bad_mcts=True) #We play one bad vs one good mcts against each other, only saving the good data
+
+policies = [Policy(game_setting), Policy(game_setting)]
+policies[0].import_data_and_train(25) #Training ANN with a maximum of 25 cases
+policies[1].import_data_and_train() #Training ANN with all available training data
+
+play_game(game_setting, policies, bad_vs_good_neural_net=True)
+
+policies = [Policy(game_setting), Policy(game_setting)]
+for policy in policies:
+    policy.import_data_and_train()
+
+play_game(game_setting, policies=policies) #We play two ANNs against each other, saving the training data.
+
+training_data_file.close() #Wrapping up the training data file.
 #client = BSA()
 #client = BSA.BasicClientActor.connect_to_server()
 #print("yolo")
@@ -155,4 +180,4 @@ policy = Policy(game_setting)
 #print("yolo")
 #client.connect_to_server()
 
-print("--- %s seconds ---" % (time.time() - start_time))
+print("--- %s seconds ---" % (time.time() - start_time)) #How much time did we use?
