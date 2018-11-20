@@ -29,7 +29,7 @@ class Policy:
 
         self.model.compile(optimizer=optimizer, loss=game_setting.loss_function, metrics=[game_setting.metrics])
 
-    def select(self, feature_vector, legal_moves):
+    def select(self, feature_vector, legal_moves, stochastic=False):
         feature_vector = np.array(feature_vector)
         loopend = feature_vector.shape[0]
         feature_vector = np.expand_dims(feature_vector, 0)
@@ -37,9 +37,10 @@ class Policy:
         for i in range(0,loopend):
             if i not in legal_moves:
                 probability_of_moves[0,i] = -10**6 #Removing all non-legal moves from neural net prediction
-
-        return probability_of_moves.argmax() #Returning the move with highest probability score
-                                                            #If several moves have equal probability, return random
+        if stochastic:
+            pass
+        else:
+            return probability_of_moves.argmax() #Returning the move with highest probability score
 
         #probability_of_moves = probability_of_moves/probability_of_moves.sum() #Adjusting all remaining probabilities
 
@@ -76,7 +77,7 @@ class Policy:
         feature_vectors = np.array([np.array(feature_vector) for feature_vector in feature_vectors])
         targets = np.array([np.array(target) for target in targets])
 
-        nr_of_cases = min(max_cases, int(self.game_setting.case_fraction*len(feature_vectors)))
+        nr_of_cases = min(max_cases, int((self.game_setting.case_fraction*len(feature_vectors))//2))
         indexes = np.random.choice(feature_vectors.shape[0], nr_of_cases, replace=False)
 
         feature_vectors = feature_vectors[indexes, :]
