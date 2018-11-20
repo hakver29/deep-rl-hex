@@ -1,5 +1,7 @@
 from BasicClientActorAbs import BasicClientActorAbs
 import math
+from main import *
+from HexState import *
 
 class BasicClientActor(BasicClientActorAbs):
     def __init__(self, IP_address = None,verbose=True):
@@ -18,8 +20,9 @@ class BasicClientActor(BasicClientActorAbs):
         """
 
         # This is an example player who picks random moves. REMOVE THIS WHEN YOU ADD YOUR OWN CODE !!
-        next_move = tuple(self.pick_random_free_cell(state, size=int(math.sqrt(len(state)-1))))
-
+        #next_move = tuple(self.pick_random_free_cell(state, size=int(math.sqrt(len(state)-1))))
+        game_setting = HexState1(keith_state = state)
+        next_move = play_game(game_setting, policy=None)
         #############################
         #
         #
