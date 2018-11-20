@@ -4,6 +4,7 @@ import tensorflow as tf
 from os import listdir
 from os.path import isfile, join
 import time
+import sys
 
 from GameSetting import GameSetting
 from definitions import DATA_DIR, MODEL_DIR, ROOT_DIR
@@ -73,16 +74,14 @@ class Policy:
 
         return features, targets
 
-    def train(self, feature_vectors, targets, batch_size=10):
+    def train(self, feature_vectors, targets, batch_size=10, max_cases=sys.maxsize):
         assert (len(feature_vectors) == len(targets))
         feature_vectors = np.array([np.array(feature_vector) for feature_vector in feature_vectors])
         targets = np.array([np.array(target) for target in targets])
 
-        for feature_vector in feature_vectors:
-            feature_vector = np.random.choice(feature_vector,len(feature_vectors)//2)
+        nr_of_cases = min(max_cases, int(self.game_setting.case_fraction*len(feature_vectors)))
 
-        for target in targets:
-            target = np.random.choice(target, len(feature_vectors) // 2)
+        feature_vectors = feature_vectors[np.random.choice(feature_vectors.shape[0], 2, replace=False), :]
 
         self.model.fit(feature_vectors, targets, epochs=self.game_setting.epochs, batch_size=batch_size)
         self.model.save("model")
