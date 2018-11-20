@@ -77,8 +77,12 @@ epochs: 20
 
 learning_rate: 0.05
 
-epsilon: 0.3
+epsilon: 0.1
 
 case_fraction: 1.0
+
+stochastic: True
+
+square_probabilities: False #Probability distributions from neural net output are squared before stochastic selection
 
 display_summary: True
