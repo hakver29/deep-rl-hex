@@ -84,6 +84,9 @@ class Policy:
         targets = targets[indexes, :]
 
         self.model.fit(feature_vectors, targets, epochs=self.game_setting.epochs, batch_size=batch_size)
+        if self.game_setting.display_summary:
+            self.model.summary()
+
         #tf.keras.utils.plot_model(self.model, to_file='model.png')
         return nr_of_cases
 
