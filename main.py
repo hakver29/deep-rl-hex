@@ -170,3 +170,7 @@ client = BSA()
 #client = BSA.BasicClientActor.connect_to_server()
 print("yolo")
 #client.connect()
+#print("yolo")
+client.connect_to_server()
+
+
