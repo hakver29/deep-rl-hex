@@ -53,7 +53,6 @@ class Topp:
                 state.set_turn(2)
 
         print(state)
-
         return state.winner()-1
 
 game_setting = GameSetting()

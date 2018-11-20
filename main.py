@@ -7,6 +7,7 @@ import copy
 from Policy import Policy
 import os
 from hexclient.BasicClientActor import BasicClientActor as BSA
+import time
 
 def tree_search(rootstate, itermax, verbose=False, policy=None):
     rootnode = Node1(state=rootstate)
@@ -56,7 +57,7 @@ def tree_search(rootstate, itermax, verbose=False, policy=None):
                 if random_num>game_setting.epsilon:
                     legal_moves = [state.convertCoordinateToInteger(move) for move in state.moves()]
                     flattened_move = policy.select(state.convertFeatureVectorToFormat(rootstate.board.flatten('F'), rootstate.toplay),
-                                            legal_moves)
+                                            legal_moves, stochastic=True)
                     assert (flattened_move in legal_moves)
                     state.play(state.convertIntegerToCoordinate(flattened_move))
                 else:
@@ -122,12 +123,12 @@ def append_result_to_training_data(rootnode, rootstate):
         move = child_node.move[1]*game_setting.size+child_node.move[0]
         target[move] = child_node.visits/rootnode.visits
 
-    feature_vector = convertFeatureVectorToFormat(rootstate.board.flatten('F'),rootstate.toplay)
+    feature_vector = rootstate.convertFeatureVectorToFormat(rootstate.board.flatten('F'),rootstate.toplay)
 
     training_data_file.write(",".join(str(int(input)) for input in feature_vector)+"|"+",".join(str(target) for target in target)+"|"+"\n")
 
 
-
+start_time = time.time()
 game_setting = GameSetting()
 file_path = training_data_file_path = DATA_DIR+'n'.join(str(dim) for dim in game_setting.network_dimensions)+"-"+str(time.time()+datetime.now().microsecond)+"-"+''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
 training_data_file = open(file_path, "w+")
@@ -143,8 +144,8 @@ print(state.winner())
 """
 play_game(game_setting)
 policy = Policy(game_setting)
-policy.import_data_and_train()
-play_game(game_setting,policy=policy)
+#policy.import_data_and_train()
+#play_game(game_setting,policy=policy)
 
 
 #client = BSA()
@@ -154,4 +155,4 @@ play_game(game_setting,policy=policy)
 #print("yolo")
 #client.connect_to_server()
 
-
+print("--- %s seconds ---" % (time.time() - start_time))

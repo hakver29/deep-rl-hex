@@ -9,6 +9,27 @@ import sys
 from GameSetting import GameSetting
 from definitions import DATA_DIR, MODEL_DIR, ROOT_DIR
 
+
+def scale_probabilities(vector, power):
+    for i in range(0, len(vector)):
+        vector[i] = vector[i]**power
+
+    return vector
+
+
+def stochastic_selection(probability_of_moves):
+    random_num = random.uniform(0,1)
+    sum = 0.0
+
+    for i in range (0,probability_of_moves.shape[1]):
+        if sum+probability_of_moves.item(i) > random_num:
+            return i
+        sum+=probability_of_moves.item(i)
+
+    raise RuntimeError #If no move is selected, something is wrong with this method
+
+
+
 class Policy:
 
     def __init__(self, game_setting):
@@ -30,7 +51,7 @@ class Policy:
 
         self.model.compile(optimizer=optimizer, loss=game_setting.loss_function, metrics=[game_setting.metrics])
 
-    def select(self, feature_vector, legal_moves, stochastic=False):
+    def select(self, feature_vector, legal_moves):
         feature_vector = np.array(feature_vector)
         loopend = feature_vector.shape[0]
         feature_vector = np.expand_dims(feature_vector, 0)
@@ -39,9 +60,13 @@ class Policy:
         #predict(x, batch_size=None, verbose=0, steps=None)
         for i in range(0,loopend):
             if i not in legal_moves:
-                probability_of_moves[0,i] = -10**6 #Removing all non-legal moves from neural net prediction
-        if stochastic:
-            pass
+                probability_of_moves[0,i] = 0.0 #Removing all non-legal moves from neural net prediction
+        if self.game_setting.stochastic:
+            if self.game_setting.square_probabilities:
+                probability_of_moves = scale_probabilities(probability_of_moves, 2) #Squaring all probabilities before
+                                                                                #stochastic selection
+            probability_of_moves = probability_of_moves/probability_of_moves.sum()
+            return stochastic_selection(probability_of_moves)
         else:
             return probability_of_moves.argmax() #Returning the move with highest probability score
 
@@ -54,7 +79,7 @@ class Policy:
         targets = []
         for file_name in files_with_training_data:
             layer_dims = [int(x) for x in file_name.split("-")[0].split('n')]
-            if layer_dims[0] == self.game_setting.size ** 2 and layer_dims[len(layer_dims) - 1] == self.game_setting.size ** 2:
+            if layer_dims[0] == self.game_setting.nr_of_legal_moves and layer_dims[len(layer_dims) - 1] == self.game_setting.nr_of_legal_moves:
                 training_data = self.import_data_from_single_file(file_name)
                 features = features + training_data[0]
                 targets = targets + training_data[1]

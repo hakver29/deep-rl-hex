@@ -19,6 +19,8 @@ class GameSetting:
         self.M = game_config["M"]
         self.verbose = game_config["verbose"]
         self.size = game_config["size"]
+        self.nr_of_legal_moves = self.size**2
+
         self.activation_function = neural_net_config['activation_function']
         self.hidden_function = neural_net_config['hidden_function']
         self.output_function = neural_net_config['output_function']
@@ -30,6 +32,8 @@ class GameSetting:
         self.learning_rate = float(neural_net_config['learning_rate'])
         self.epsilon = float(neural_net_config['epsilon'])
         self.case_fraction = float(neural_net_config['case_fraction'])
+        self.stochastic = bool(neural_net_config['stochastic'])
+        self.square_probabilities = bool(neural_net_config['square_probabilities'])
         self.display_summary = bool(neural_net_config['display_summary'])
 
         self.K = int(topp_config['K'])
