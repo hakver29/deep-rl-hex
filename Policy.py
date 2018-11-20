@@ -71,18 +71,20 @@ class Policy:
 
         return features, targets
 
-    def train(self, feature_vectors, targets, batch_size=10, max_cases=sys.maxsize):
+    def train(self, feature_vectors, targets, max_cases, batch_size=10):
         assert (len(feature_vectors) == len(targets))
         feature_vectors = np.array([np.array(feature_vector) for feature_vector in feature_vectors])
         targets = np.array([np.array(target) for target in targets])
 
         nr_of_cases = min(max_cases, int(self.game_setting.case_fraction*len(feature_vectors)))
+        indexes = np.random.choice(feature_vectors.shape[0], nr_of_cases, replace=False)
 
-        feature_vectors = feature_vectors[np.random.choice(feature_vectors.shape[0], 2, replace=False), :]
+        feature_vectors = feature_vectors[indexes, :]
+        targets = targets[indexes, :]
 
         self.model.fit(feature_vectors, targets, epochs=self.game_setting.epochs, batch_size=batch_size)
         #tf.keras.utils.plot_model(self.model, to_file='model.png')
 
-    def import_all_data_and_train(self):
+    def import_all_data_and_train(self, max_cases=sys.maxsize):
         features, targets = self.read_all_training_data()
-        self.train(features, targets)
+        self.train(features, targets, max_cases)
