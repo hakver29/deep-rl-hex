@@ -161,7 +161,7 @@ print(state.winner())
 """
 play_game(game_setting)
 policy = Policy(game_setting)
-policy.import_all_data_and_train()
+policy.import_data_and_train()
 play_game(game_setting,policy=policy)
 
 
