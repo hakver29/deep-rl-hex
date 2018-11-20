@@ -50,42 +50,42 @@ def tree_search(rootstate, itermax, verbose=False, policy=None):
         -Wikipedia
         """
 
-    # Selection
-    while node.untried_moves == [] and node.childNodes != []:
-        node = node.select_child()
-        state.play(node.move)
+        # Selection
+        while node.untried_moves == [] and node.childNodes != []:
+            node = node.select_child()
+            state.play(node.move)
 
-    # Expansion
-    if node.untried_moves != []:
-        move = random.choice(node.untried_moves)
-        state.play(move)
-        node = node.add_child(move, state)
+        # Expansion
+        if node.untried_moves != []:
+            move = random.choice(node.untried_moves)
+            state.play(move)
+            node = node.add_child(move, state)
 
-    # Simulation
-    if policy is None:
-        # Simulation with random, vanilla MCTS if no neural net policy is defined.
-        while state.winner() == 0:
-            state.play(random.choice(state.moves()))
-    else:
-        #If a neural net policy is defined, we let the neural net do the rollouts / simulations
-        while state.winner() == 0:
-            random_num = random.uniform(0, 1)
-            #If our random number exceeds epsilon, we let the ANN pick move. If not, the move is random.
-            if random_num>game_setting.epsilon:
-                legal_moves = [convertCoordinateToInteger(move, game_setting.size) for move in state.moves()]
-                flattened_move = policy.select(convertFeatureVectorToFormat(rootstate.board.flatten('F'), rootstate.toplay),
-                                        legal_moves)
-                assert (flattened_move in legal_moves)
-                state.play(convertIntegerToCoordinate(flattened_move, game_setting.size))
-            else:
+        # Simulation
+        if policy is None:
+            # Simulation with random, vanilla MCTS if no neural net policy is defined.
+            while state.winner() == 0:
                 state.play(random.choice(state.moves()))
+        else:
+            #If a neural net policy is defined, we let the neural net do the rollouts / simulations
+            while state.winner() == 0:
+                random_num = random.uniform(0, 1)
+                #If our random number exceeds epsilon, we let the ANN pick move. If not, the move is random.
+                if random_num>game_setting.epsilon:
+                    legal_moves = [convertCoordinateToInteger(move, game_setting.size) for move in state.moves()]
+                    flattened_move = policy.select(convertFeatureVectorToFormat(rootstate.board.flatten('F'), rootstate.toplay),
+                                            legal_moves)
+                    assert (flattened_move in legal_moves)
+                    state.play(convertIntegerToCoordinate(flattened_move, game_setting.size))
+                else:
+                    state.play(random.choice(state.moves()))
 
-    # Backpropagation
-    while node != None:
-        node.visits += 1
-        if node.toplay != state.winner():
-            node.wins += 1
-        node = node.parentNode
+        # Backpropagation
+        while node != None:
+            node.visits += 1
+            if node.toplay != state.winner():
+                node.wins += 1
+            node = node.parentNode
 
     if game_setting.verbose == True:
         print(rootnode.children_to_string())
