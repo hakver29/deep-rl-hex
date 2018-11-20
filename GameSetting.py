@@ -30,6 +30,7 @@ class GameSetting:
         self.learning_rate = float(neural_net_config['learning_rate'])
         self.epsilon = float(neural_net_config['epsilon'])
         self.case_fraction = float(neural_net_config['case_fraction'])
+        self.display_summary = bool(neural_net_config['display_summary'])
 
         self.K = int(topp_config['K'])
         self.topp_G = int(topp_config['G'])

@@ -1,6 +1,7 @@
 from Policy import Policy
 from prettytable import PrettyTable
 from HexState import HexState1
+from GameSetting import GameSetting
 
 class Topp:
 
@@ -28,13 +29,22 @@ class Topp:
                     else:
                         self.policies[k][2] += 1
 
+        t = PrettyTable(['Number of training cases', 'Wins', 'Losses'])
 
+        for i in range(0,self.K):
+            self.policies[i][3] = self.G*(self.K-1)-self.policies[i][2]
+            t.add_row([str(self.policies[i][1]), str(self.policies[i][2]), str(self.policies[i][3])])
+
+        print(t)
 
     def play_game(self, policies):
         state = HexState1(self.game_setting)
         while (state.white_groups.connected(1, 2) == False and state.black_groups.connected(1, 2) == False):
             #def select(self, feature_vector, legal_moves, stochastic=False):
-            move = policies[state.toplay-1][0].select(state.convertFeatureVectorToFormat(state.board.flatten('F')))
+            policy = policies[state.toplay-1]
+            legal_moves = [state.convertCoordinateToInteger(move) for move in state.moves()]
+            integerMove = policy.select(state.convertFeatureVectorToFormat(state.board.flatten('F'), state.toplay), legal_moves)
+            move = state.convertIntegerToCoordinate(integerMove)
             if state.toplay == 2:
                 state.place_black(move)
                 state.set_turn(1)
@@ -43,3 +53,10 @@ class Topp:
                 state.set_turn(2)
 
         print(state)
+
+        return state.winner()-1
+
+game_setting = GameSetting()
+topp = Topp(game_setting)
+topp.train_policies()
+topp.play_tournament()

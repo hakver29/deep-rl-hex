@@ -80,3 +80,5 @@ learning_rate: 0.05
 epsilon: 0.3
 
 case_fraction: 1.0
+
+display_summary: True
