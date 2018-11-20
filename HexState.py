@@ -32,6 +32,20 @@ class HexState1:
         self.white_groups = unionfind()
         self.black_groups = unionfind()
 
+    def __init__(self, keith_state):
+        """
+        Initialize the game board and give white first turn.
+        Also create our union find structures for win checking.
+        """
+        self.size = 5
+        # self.toplay = self.PLAYERS["white"]
+        players = {1:"white", 2: "black"}
+        self.toplay = self.PLAYERS[players[keith_state[0]]]
+        self.board = np.reshape(keith_state[1:25],(5,5))
+        #self.gamesetting = gamesetting
+        self.white_groups = unionfind()
+        self.black_groups = unionfind()
+
     def play(self, cell):
         """
         Play a stone of the current turns color in the passed cell.
