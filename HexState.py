@@ -1,6 +1,15 @@
 import numpy as np
 from unionfind import unionfind
 
+def convertIntegerToCoordinate(intMove, boardSize):
+    ycoordinate = intMove//boardSize
+    xcoordinate = intMove%boardSize
+    return xcoordinate,ycoordinate
+
+
+def convertCoordinateToInteger(move, boardSize):
+    return move[1]*boardSize + move[0]
+
 class HexState1:
     """
     Stores information representing the current state of a game of hex, namely
