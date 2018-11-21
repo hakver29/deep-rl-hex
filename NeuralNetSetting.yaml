@@ -10,7 +10,7 @@
 #tf.sigmoid
 #tf.tanh
 
-activation_function: "tanh"
+activation_function: "relu"
 hidden_function: "relu"
 output_function: "softmax"
 
@@ -32,8 +32,7 @@ output_function: "softmax"
 #Ex "hidden_layers =" will default to a hardcoded set of parameters that set an appropriate number of hidden layers
 #with an appropriate number of neurons relative to the board size.
 
-hidden_layers: 100, 100
-
+hidden_layers: 50
 
 #SGD
 #RMSprop
@@ -73,9 +72,9 @@ metrics: categorical_accuracy
 
 #This parameter defines how many epochs should be run for each training_batch
 
-epochs: 20
+epochs: 100
 
-learning_rate: 0.1
+learning_rate: 0.08
 
 epsilon: 0.15
 

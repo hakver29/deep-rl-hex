@@ -57,9 +57,9 @@ tf.keras.initializers.Ones())) #Add input layer
 
     def select(self, feature_vector, legal_moves):
         feature_vector = np.array(feature_vector)
-        loopend = feature_vector.shape[0]
+        loopend = feature_vector.shape[0]-1
         feature_vector = np.expand_dims(feature_vector, 0)
-        probability_of_moves = self.model.predict_on_batch(feature_vector)
+        probability_of_moves = self.model.predict(feature_vector)
         for i in range(0,loopend):
             if i not in legal_moves:
                 probability_of_moves[0,i] = 0.0 #Removing all non-legal moves from neural net prediction
@@ -70,9 +70,12 @@ tf.keras.initializers.Ones())) #Add input layer
             probability_of_moves = probability_of_moves/probability_of_moves.sum()
             return stochastic_selection(probability_of_moves, legal_moves)
         else:
+            for i in range(0, loopend):
+                if i not in legal_moves:
+                    probability_of_moves[0, i] = -1000.0  # Removing all non-legal moves from neural net prediction
             return probability_of_moves.argmax() #Returning the move with highest probability score
 
-        #probability_of_moves = probability_of_moves/probability_of_moves.sum() #Adjusting all remaining probabilities
+            #probability_of_moves = probability_of_moves/probability_of_moves.sum() #Adjusting all remaining probabilities
 
     def read_all_training_data(self):
         path = DATA_DIR
@@ -81,7 +84,7 @@ tf.keras.initializers.Ones())) #Add input layer
         targets = []
         for file_name in files_with_training_data:
             layer_dims = [int(x) for x in file_name.split("-")[0].split('n')]
-            if layer_dims[0] == self.game_setting.nr_of_legal_moves and layer_dims[len(layer_dims) - 1] == self.game_setting.nr_of_legal_moves:
+            if layer_dims[0] == self.game_setting.nr_of_legal_moves+1 and layer_dims[len(layer_dims) - 1] == self.game_setting.nr_of_legal_moves:
                 training_data = self.import_data_from_single_file(file_name)
                 features = features + training_data[0]
                 targets = targets + training_data[1]
@@ -118,7 +121,7 @@ tf.keras.initializers.Ones())) #Add input layer
             self.model.summary()
 
         #tf.keras.utils.plot_model(self.model, to_file='model.png')
-        self.model.save("model")
+        #self.model.save("model")
         return nr_of_cases
 
     def import_data_and_train(self, max_cases=sys.maxsize):

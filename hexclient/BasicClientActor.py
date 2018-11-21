@@ -31,7 +31,10 @@ class BasicClientActor(BasicClientActorAbs):
     def __init__(self, IP_address = None,verbose=True):
         self.series_id = -1
         BasicClientActorAbs.__init__(self, IP_address,verbose=verbose)
-        self.model = tf.keras.models.load_model(MODEL_DIR + "test1")
+        #self.model = tf.keras.models.load_model(MODEL_DIR + "test1")
+        self.game_setting = GameSetting()
+        self.policy = Policy(self.game_setting)
+        self.policy.import_data_and_train()
 
     def handle_get_action(self, state):
         """
@@ -47,19 +50,17 @@ class BasicClientActor(BasicClientActorAbs):
         # This is an example player who picks random moves. REMOVE THIS WHEN YOU ADD YOUR OWN CODE !!
         next_move = tuple(self.pick_random_free_cell(state, size=int(math.sqrt(len(state)-1))))
 
-        game_setting = GameSetting()
         # Her blir ikke player initialisert i game_setting
-        print("testesttest")
-        self.model.compile(loss='mean_squared_error',
-                      optimizer='Adam',
-                      metrics=['accuracy'])
-        moves = self.model.predict(state)
-        policy = Policy(game_setting)
-        hexstate = HexState1(gamesetting = game_setting, keith_state = state)
+        #moves = self.model.predict(state)
+        hexstate = HexState1(gamesetting = self.game_setting, keith_state = state)
         rootnode = Node1(state=hexstate)
         legal_moves = [hexstate.convertCoordinateToInteger(move) for move in rootnode.untried_moves]
-        intMove = policy.select(hexstate.board.flatten('F'), legal_moves)
+
+        start_time = time.time()  # We start counting the time.
+        intMove = self.policy.select(hexstate.board.flatten('F'), legal_moves)
+        print("--- %s seconds ---" % (time.time() - start_time))  # How much time did we use?
         next_move = hexstate.convertIntegerToCoordinate(intMove)
+
         #next_move = tuple(self.pick_random_free_cell(state, size=int(math.sqrt(len(state) - 1))))
         #############################
         #

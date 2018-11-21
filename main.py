@@ -11,14 +11,6 @@ import os
 from hexclient.BasicClientActor import BasicClientActor as BSA
 import time
 
-def convertIntegerToCoordinate(intMove, boardSize):
-    ycoordinate = intMove//boardSize
-    xcoordinate = intMove%boardSize
-    return xcoordinate,ycoordinate
-
-
-def convertCoordinateToInteger(move, boardSize):
-    return move[1]*boardSize + move[0]
 
 def tree_search(rootstate, itermax, verbose=False, policy=None, policies=None, save_training=True):
     rootnode = Node1(state=rootstate)
@@ -99,14 +91,17 @@ def play_game(game_setting, policies=None, bad_mcts=False, bad_vs_good_neural_ne
     #ANN may respond erratically to.
     player_wins = {"black": 0, "white": 0}
     for i in range(game_setting.G):
+        playerdict = {1:"white", 2: "black"}
+        game_setting.P = playerdict[i%2 + 1]
         state = HexState1(game_setting)
         while (state.white_groups.connected(1,2) == False and state.black_groups.connected(1,2) == False):
             if bad_mcts:
-                if state.toplay == 2:
+                ttoplay = random.randint(1,2)
+                if state.toplay == ttoplay:
                     move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose,
                                        policies=None, save_training=True)
-                elif state.toplay == 1:
-                    move = tree_search(rootstate=state, itermax=game_setting.M//15, verbose=game_setting.verbose,
+                elif state.toplay == ttoplay:
+                    move = tree_search(rootstate=state, itermax=1, verbose=game_setting.verbose,
                                        policies=None, save_training=False)
             elif bad_vs_good_neural_net is not None:
                 #Bad neural net on first index, good neural net on second index
@@ -137,6 +132,9 @@ def play_game(game_setting, policies=None, bad_mcts=False, bad_vs_good_neural_ne
                 print("Player black wins" + "\n")
             elif state.winner() == 1:
                 print("Player white wins" + "\n")
+
+        if (i%5) == 0:
+            print("We have played " + str(i) + " games. player_wins: " + str(player_wins))
 
         print(state)
 
@@ -172,7 +170,7 @@ play_game(game_setting) #First, we play a vanilla MCTS game
 print("Bad vs good MCTS")
 play_game(game_setting, bad_mcts=True) #We play one bad vs one good mcts against each other, only saving the good data
 
-
+"""
 policies = [Policy(game_setting), Policy(game_setting)]
 policies[0].import_data_and_train(25) #Training ANN with a maximum of 25 cases
 policies[1].import_data_and_train() #Training ANN with all available training data
@@ -189,7 +187,7 @@ policies = [Policy(game_setting), Policy(game_setting)]
 for policy in policies:
     policy.import_data_and_train()
 print("good vs good ANN"), play_game(game_setting, policies=policies) #We play two ANNs against each other, saving the training data.
-
+"""
 
 training_data_file.close() #Wrapping up the training data file.
 #client = BSA()

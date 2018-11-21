@@ -44,7 +44,7 @@ class GameSetting:
 
     def read_network_dimensions(self, hidden_layer_dims):
 
-        network_dimensions = [self.size**2]
+        network_dimensions = [self.size**2+1]
 
         if type(hidden_layer_dims) == int:
             network_dimensions.append(hidden_layer_dims)

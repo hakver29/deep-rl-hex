@@ -154,13 +154,18 @@ class HexState1:
         return move[1] * self.size + move[0]
 
     def convertFeatureVectorToFormat(self, feature_vector, toplay):
+        feature_vector = feature_vector.tolist()
+        feature_vector.insert(0,toplay)
+        feature_vector = np.array(feature_vector)
+        return feature_vector
+        """
         for i in range(0, len(feature_vector)):
             if feature_vector[i] == float(toplay):
                 feature_vector[i] = 1
-            elif feature_vector[i] != 0.0:
+            elif feature_vector[i] == float(toplay%2+1):
                 feature_vector[i] = -1
 
-        return feature_vector
+        return feature_vector"""
 
     def __str__(self):
         """

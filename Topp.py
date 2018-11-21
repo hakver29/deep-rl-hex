@@ -3,6 +3,7 @@ from prettytable import PrettyTable
 from HexState import HexState1
 from GameSetting import GameSetting
 import random
+import time
 
 class Topp:
 
@@ -21,7 +22,7 @@ class Topp:
 
         for i in range(0,self.K):
             policy = Policy(self.game_setting)
-            nr_of_cases = max_cases//((i+1))
+            nr_of_cases = max_cases//((i+1)**3)
             actual_nr_of_cases = policy.import_data_and_train(max_cases=nr_of_cases)
             self.policies.append([policy, actual_nr_of_cases, 0,0])
 
@@ -50,10 +51,8 @@ class Topp:
         print(t)
 
     def play_game(self, policies, i):
-        if i%2 + 1 == 1:
-            self.game_setting.P = "white"
-        else:
-            self.game_setting.P = "black"
+        playerdict = {1: "white", 2: "black"}
+        self.game_setting.P = playerdict[i%2+1]
         state = HexState1(self.game_setting)
         while (state.white_groups.connected(1, 2) == False and state.black_groups.connected(1, 2) == False):
             random_num = random.uniform(0, 1)
@@ -64,8 +63,13 @@ class Topp:
                 legal_moves = [state.convertCoordinateToInteger(move) for move in state.moves()]
                 feature_vector = state.convertFeatureVectorToFormat(state.board.flatten('F'), state.toplay)
                 #print("Board representation sent to ANN: " + str(feature_vector))
+
+                start_time = time.time()  # We start counting the time.
                 integerMove = policy.select(feature_vector, legal_moves)
+                print("--- %s seconds ---" % (time.time() - start_time))  # How much time did we use?
+
                 move = state.convertIntegerToCoordinate(integerMove)
+
                 #print("ANN suggests moving " + str(move))
             else:
                 move = random.choice(state.moves())
@@ -75,7 +79,8 @@ class Topp:
             elif state.toplay == 1:
                 state.place_white(move)
                 state.set_turn(2)
-            #print(state)
+            print(state)
+
             #print("\n\n")
         players = {1: "white", 2: "black"}
         #print(state)
