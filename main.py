@@ -100,7 +100,7 @@ def play_game(game_setting, policies=None, bad_mcts=False, bad_vs_good_neural_ne
                 if state.toplay == ttoplay:
                     move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose,
                                        policies=None, save_training=True)
-                elif state.toplay == ttoplay:
+                elif state.toplay == 3-ttoplay:
                     move = tree_search(rootstate=state, itermax=1, verbose=game_setting.verbose,
                                        policies=None, save_training=False)
             elif bad_vs_good_neural_net is not None:
@@ -153,7 +153,7 @@ def append_result_to_training_data(rootnode, rootstate):
         move = child_node.move[1]*game_setting.size+child_node.move[0]
         target[move] = child_node.visits/rootnode.visits
 
-    feature_vector = rootstate.convertFeatureVectorToFormat(rootstate.board.flatten('F'),rootstate.toplay)
+    feature_vector = rootstate.convertFeatureVectorToFormat(rootstate.board.flatten('F'))
 
     training_data_file.write(",".join(str(int(input)) for input in feature_vector)+"|"+",".join(str(target) for target in target)+"|"+"\n")
 

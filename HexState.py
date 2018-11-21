@@ -153,9 +153,9 @@ class HexState1:
     def convertCoordinateToInteger(self, move):
         return move[1] * self.size + move[0]
 
-    def convertFeatureVectorToFormat(self, feature_vector, toplay):
+    def convertFeatureVectorToFormat(self, feature_vector):
         feature_vector = feature_vector.tolist()
-        feature_vector.insert(0,toplay)
+        feature_vector.insert(0,self.toplay)
         feature_vector = np.array(feature_vector)
         return feature_vector
         """
