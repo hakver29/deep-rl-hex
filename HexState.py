@@ -195,3 +195,9 @@ class HexState1:
         ret+=' '*(offset*2+1)+(black+' '*offset*2)*self.size
 
         return ret
+
+def convertFeatureVectorToFormat(feature_vector, toplay):
+    feature_vector = feature_vector.tolist()
+    feature_vector.insert(0,toplay)
+    feature_vector = np.array(feature_vector)
+    return feature_vector

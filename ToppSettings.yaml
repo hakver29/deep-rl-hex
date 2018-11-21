@@ -1,5 +1,5 @@
-K: 5
-G: 125
-nr_of_training_cases: 1000
+K: 3
+G: 500
+nr_of_training_cases: 200
 epsilon: 0.0
 epochs: 10

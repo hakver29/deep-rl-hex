@@ -22,7 +22,7 @@ class Topp:
 
         for i in range(0,self.K):
             policy = Policy(self.game_setting)
-            nr_of_cases = max_cases//((i+1)**3)
+            nr_of_cases = max_cases//((i+1))
             actual_nr_of_cases = policy.import_data_and_train(max_cases=nr_of_cases)
             self.policies.append([policy, actual_nr_of_cases, 0,0])
 
@@ -61,7 +61,7 @@ class Topp:
                 #def select(self, feature_vector, legal_moves, stochastic=False):
                 policy = policies[state.toplay-1]
                 legal_moves = [state.convertCoordinateToInteger(move) for move in state.moves()]
-                feature_vector = state.convertFeatureVectorToFormat(state.board.flatten('F'), state.toplay)
+                feature_vector = state.convertFeatureVectorToFormat(state.board.flatten('F'))
                 #print("Board representation sent to ANN: " + str(feature_vector))
 
                 start_time = time.time()  # We start counting the time.

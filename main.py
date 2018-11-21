@@ -2,6 +2,7 @@
 #from HexState import *
 from Node import *
 from HexState import *
+from HexState import convertFeatureVectorToFormat
 from GameSetting import *
 import copy
 from Policy import *
@@ -77,7 +78,7 @@ def tree_search(rootstate, itermax, verbose=False, policy=None, policies=None, s
         print(rootnode.children_to_string())
 
     if save_training:
-        append_result_to_training_data(rootnode, rootstate)
+        append_result_to_training_data(rootnode, rootstate, 3-state.toplay, itermax)
     return max(rootnode.childNodes, key=lambda c: c.visits).move
 
 
@@ -97,10 +98,10 @@ def play_game(game_setting, policies=None, bad_mcts=False, bad_vs_good_neural_ne
         while (state.white_groups.connected(1,2) == False and state.black_groups.connected(1,2) == False):
             if bad_mcts:
                 ttoplay = random.randint(1,2)
-                if state.toplay == ttoplay:
+                if state.toplay == 1:
                     move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose,
                                        policies=None, save_training=True)
-                elif state.toplay == 3-ttoplay:
+                elif state.toplay == 2:
                     move = tree_search(rootstate=state, itermax=1, verbose=game_setting.verbose,
                                        policies=None, save_training=False)
             elif bad_vs_good_neural_net is not None:
@@ -146,16 +147,16 @@ def play_game(game_setting, policies=None, bad_mcts=False, bad_vs_good_neural_ne
 
 
 
-def append_result_to_training_data(rootnode, rootstate):
+def append_result_to_training_data(rootnode, rootstate, toplay, itermax):
     target = [0] * game_setting.nr_of_legal_moves
 
     for child_node in rootnode.childNodes:
         move = child_node.move[1]*game_setting.size+child_node.move[0]
         target[move] = child_node.visits/rootnode.visits
 
-    feature_vector = rootstate.convertFeatureVectorToFormat(rootstate.board.flatten('F'))
+    feature_vector = convertFeatureVectorToFormat(rootstate.board.flatten('F'), toplay)
 
-    training_data_file.write(",".join(str(int(input)) for input in feature_vector)+"|"+",".join(str(target) for target in target)+"|"+"\n")
+    training_data_file.write(",".join(str(int(input)) for input in feature_vector)+"|"+",".join(str(target) for target in target)+"|"+str(itermax)+"\n")
 
 start_time = time.time() #We start counting the time.
 
@@ -164,8 +165,8 @@ game_setting = GameSetting() #Load the game settings.
 file_path = training_data_file_path = DATA_DIR+'n'.join(str(dim) for dim in game_setting.network_dimensions)+"-"+str(time.time()+datetime.now().microsecond)+"-"+''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
 training_data_file = open(file_path, "w+")
 
-print("Vanilla MCTS")
-play_game(game_setting) #First, we play a vanilla MCTS game
+#print("Vanilla MCTS")
+#play_game(game_setting) #First, we play a vanilla MCTS game
 
 print("Bad vs good MCTS")
 play_game(game_setting, bad_mcts=True) #We play one bad vs one good mcts against each other, only saving the good data
