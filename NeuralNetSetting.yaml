@@ -10,7 +10,7 @@
 #tf.sigmoid
 #tf.tanh
 
-activation_function: "relu"
+activation_function: "tanh"
 hidden_function: "relu"
 output_function: "softmax"
 
@@ -32,7 +32,7 @@ output_function: "softmax"
 #Ex "hidden_layers =" will default to a hardcoded set of parameters that set an appropriate number of hidden layers
 #with an appropriate number of neurons relative to the board size.
 
-hidden_layers: 100
+hidden_layers: 100, 100
 
 
 #SGD
@@ -60,7 +60,7 @@ optimizer: Adam
 #poisson
 #cosine_proximity
 
-loss_function:  categorical_crossentropy
+loss_function:  mean_squared_error
 
 
 #binary_accuracy
@@ -71,11 +71,18 @@ loss_function:  categorical_crossentropy
 
 metrics: categorical_accuracy
 
-
 #This parameter defines how many epochs should be run for each training_batch
 
 epochs: 20
 
-learning_rate: 0.05
+learning_rate: 0.1
 
-epsilon: 0.3
+epsilon: 0.15
+
+case_fraction: 1.0
+
+stochastic: True
+
+square_probabilities: True #Probability distributions from neural net output are squared before stochastic selection
+
+display_summary: True

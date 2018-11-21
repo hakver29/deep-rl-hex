@@ -32,8 +32,5 @@ def read_training_data(size):
 
 game_setting = GameSetting()
 policy = Policy(game_setting)
-
-
 x,y = read_training_data(game_setting.size)
 policy.train(x, y)
-

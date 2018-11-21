@@ -3,6 +3,7 @@ import socket, ssl, pprint, getpass
 import random
 import math
 from abc import ABC, abstractmethod
+from definitions import ROOT_DIR
 
 
 class BasicClientActorAbs(ABC):
@@ -19,7 +20,7 @@ class BasicClientActorAbs(ABC):
         # We require a certificate from the server. We used a self-signed certificate
         # so here ca_certs must be the server certificate itself.
         self.ssl_sock = ssl.wrap_socket(self.s,
-                                   ca_certs="server.crt",
+                                   ca_certs=ROOT_DIR+"hexclient/server.crt",
                                    cert_reqs=ssl.CERT_REQUIRED)
 
         self.series_id = -1
