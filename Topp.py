@@ -8,6 +8,7 @@ class Topp:
 
     def __init__(self, game_setting):
         self.game_setting = game_setting
+        self.game_setting.epochs = self.game_setting.topp_epochs
         self.K = game_setting.K
         self.G = game_setting.topp_G
         self.max_cases = game_setting.max_cases
@@ -20,15 +21,16 @@ class Topp:
 
         for i in range(0,self.K):
             policy = Policy(self.game_setting)
-            nr_of_cases = max_cases//(i+1)
+            nr_of_cases = max_cases//(((i+1)**3))
             actual_nr_of_cases = policy.import_data_and_train(max_cases=nr_of_cases)
             self.policies.append([policy, actual_nr_of_cases, 0,0])
 
     def play_tournament(self):
         for i in range(0,self.K-1):
             for k in range (i+1,self.K):
+                print("\n" + str(i + 1) + ". best ANN vs. the " + str(k + 1) + " best ANN. Playing " + str(
+                    self.G) + " games. Games are below.")
                 for m in range(0, self.G):
-                    print("\n"+str(i) + ". best ANN vs. the " + str(k) + " best ANN. Playing " + str(self.G) + " games. Games are below.")
                     result = self.play_game([self.policies[i][0], self.policies[k][0]],m)
                     if result == 0:
                         self.policies[i][2] += 1
@@ -37,10 +39,14 @@ class Topp:
                         self.policies[k][2] += 1
                         self.policies[i][3] += 1
 
-        t = PrettyTable(['Number of training cases', 'Wins', 'Losses'])
+        t = PrettyTable(['Theoretical rank','Number of training cases', 'Wins', 'Losses', '% Win'])
 
         for i in range(0,self.K):
-            t.add_row([str(self.policies[i][1]), str(self.policies[i][2]), str(self.policies[i][3])])
+            training_cases = self.policies[i][1]
+            wins = self.policies[i][2]
+            losses = self.policies[i][3]
+            win_rate = (round(wins/(wins+losses), 2))*100
+            t.add_row([i+1, training_cases, wins, losses, win_rate])
         print(t)
 
     def play_game(self, policies, i):
@@ -56,8 +62,11 @@ class Topp:
                 #def select(self, feature_vector, legal_moves, stochastic=False):
                 policy = policies[state.toplay-1]
                 legal_moves = [state.convertCoordinateToInteger(move) for move in state.moves()]
-                integerMove = policy.select(state.convertFeatureVectorToFormat(state.board.flatten('F'), state.toplay), legal_moves)
+                feature_vector = state.convertFeatureVectorToFormat(state.board.flatten('F'), state.toplay)
+                #print("Board representation sent to ANN: " + str(feature_vector))
+                integerMove = policy.select(feature_vector, legal_moves)
                 move = state.convertIntegerToCoordinate(integerMove)
+                #print("ANN suggests moving " + str(move))
             else:
                 move = random.choice(state.moves())
             if state.toplay == 2:
@@ -66,9 +75,11 @@ class Topp:
             elif state.toplay == 1:
                 state.place_white(move)
                 state.set_turn(2)
+            #print(state)
+            #print("\n\n")
         players = {1: "white", 2: "black"}
-        print(state)
-        print(players[state.winner()] + " wins.")
+        #print(state)
+        #print(players[state.winner()] + " wins.")
         return state.winner()-1
 
 game_setting = GameSetting()

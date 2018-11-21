@@ -1,4 +1,5 @@
 K: 5
-G: 10
-nr_of_training_cases: 400
-epsilon: 1.0
+G: 10000
+nr_of_training_cases: 1000
+epsilon: 0.1
+epochs: 10

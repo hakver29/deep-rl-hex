@@ -4,6 +4,7 @@ import tensorflow as tf
 from os import listdir
 from os.path import isfile, join
 import sys
+import warnings
 
 from GameSetting import GameSetting
 from definitions import DATA_DIR
@@ -16,7 +17,7 @@ def scale_probabilities(vector, power):
     return vector
 
 
-def stochastic_selection(probability_of_moves):
+def stochastic_selection(probability_of_moves, legal_moves):
     random_num = random.uniform(0,1)
     sum = 0.0
 
@@ -25,7 +26,9 @@ def stochastic_selection(probability_of_moves):
             return i
         sum+=probability_of_moves.item(i)
 
-    raise RuntimeError #If no move is selected, something is wrong with this method
+    warnings.warn("All moves had zero probability in neural net prediction.")
+
+    return random.choice(legal_moves)
 
 
 
@@ -39,7 +42,8 @@ class Policy:
         ofunc = eval("tf.nn." + game_setting.output_function)
 
         self.model = tf.keras.models.Sequential() #Defining feed-forward neural net
-        self.model.add(tf.keras.layers.Dense(dims[0], input_shape=(dims[0],), activation=afunc)) #Add input layer
+        self.model.add(tf.keras.layers.Dense(dims[0], input_shape=(dims[0],), activation=afunc, kernel_initializer=
+tf.keras.initializers.Ones())) #Add input layer
         for i in range(1,len(dims)-1):
             self.model.add(tf.keras.layers.Dense(dims[i], activation=hfunc)) #add hidden layers
         self.model.add(tf.keras.layers.Dense(dims[len(dims)-1], activation=ofunc)) #add output layer
@@ -63,7 +67,7 @@ class Policy:
                 probability_of_moves = scale_probabilities(probability_of_moves, 2) #Squaring all probabilities before
                                                                                 #stochastic selection
             probability_of_moves = probability_of_moves/probability_of_moves.sum()
-            return stochastic_selection(probability_of_moves)
+            return stochastic_selection(probability_of_moves, legal_moves)
         else:
             return probability_of_moves.argmax() #Returning the move with highest probability score
 
@@ -108,7 +112,7 @@ class Policy:
         feature_vectors = feature_vectors[indexes, :]
         targets = targets[indexes, :]
 
-        self.model.fit(feature_vectors, targets, epochs=self.game_setting.epochs, batch_size=batch_size)
+        self.model.fit(feature_vectors, targets, epochs=self.game_setting.epochs, batch_size=batch_size, shuffle=False)
         if self.game_setting.display_summary:
             self.model.summary()
 

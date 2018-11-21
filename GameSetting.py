@@ -40,6 +40,7 @@ class GameSetting:
         self.topp_G = int(topp_config['G'])
         self.max_cases = int(topp_config['nr_of_training_cases'])
         self.topp_epsilon = float(topp_config['epsilon'])
+        self.topp_epochs = int(topp_config['epochs'])
 
     def read_network_dimensions(self, hidden_layer_dims):
 

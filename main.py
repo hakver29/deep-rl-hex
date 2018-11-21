@@ -92,18 +92,18 @@ def play_game(game_setting, policies=None, bad_mcts=False, bad_vs_good_neural_ne
         while (state.white_groups.connected(1,2) == False and state.black_groups.connected(1,2) == False):
             if bad_mcts:
                 if state.toplay == 2:
-                    move = tree_search(rootstate=state, itermax=15000, verbose=game_setting.verbose,
+                    move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose,
                                        policies=None, save_training=True)
                 elif state.toplay == 1:
-                    move = tree_search(rootstate=state, itermax=1000, verbose=game_setting.verbose,
+                    move = tree_search(rootstate=state, itermax=game_setting.M//15, verbose=game_setting.verbose,
                                        policies=None, save_training=False)
             elif bad_vs_good_neural_net is not None:
                 #Bad neural net on first index, good neural net on second index
                 if state.toplay == 2:
-                    move = tree_search(rootstate=state, itermax=5000, verbose=game_setting.verbose,
+                    move = tree_search(rootstate=state, itermax=game_setting.M//2, verbose=game_setting.verbose,
                                        policies=policies, save_training=True)
                 elif state.toplay == 1:
-                    move = tree_search(rootstate=state, itermax=500, verbose=game_setting.verbose,
+                    move = tree_search(rootstate=state, itermax=game_setting.M//30, verbose=game_setting.verbose,
                                        policies=policies, save_training=False)
             else:
                 move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose, policies=policies)
@@ -156,21 +156,30 @@ game_setting = GameSetting() #Load the game settings.
 file_path = training_data_file_path = DATA_DIR+'n'.join(str(dim) for dim in game_setting.network_dimensions)+"-"+str(time.time()+datetime.now().microsecond)+"-"+''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
 training_data_file = open(file_path, "w+")
 
+print("Vanilla MCTS")
 play_game(game_setting) #First, we play a vanilla MCTS game
 
+print("Bad vs good MCTS")
 play_game(game_setting, bad_mcts=True) #We play one bad vs one good mcts against each other, only saving the good data
 
+#print("bad vs good ANN"), play_game(game_setting, policies, bad_vs_good_neural_net=True)
 policies = [Policy(game_setting), Policy(game_setting)]
 policies[0].import_data_and_train(25) #Training ANN with a maximum of 25 cases
 policies[1].import_data_and_train() #Training ANN with all available training data
 
-play_game(game_setting, policies, bad_vs_good_neural_net=True)
 
+#print("completely untrained ANN vs good ANN"), play_game(game_setting, policies, bad_vs_good_neural_net=True)
+policies = [Policy(game_setting), Policy(game_setting)]
+                                    #Note that the 0st neural net receives no training at all
+policies[1].import_data_and_train() #Training ANN with all available training data
+
+
+#print("good vs good ANN"), play_game(game_setting, policies=policies) #We play two ANNs against each other, saving the training data.
 policies = [Policy(game_setting), Policy(game_setting)]
 for policy in policies:
     policy.import_data_and_train()
 
-play_game(game_setting, policies=policies) #We play two ANNs against each other, saving the training data.
+
 
 training_data_file.close() #Wrapping up the training data file.
 #client = BSA()
