@@ -60,6 +60,8 @@ tf.keras.initializers.Ones())) #Add input layer
         loopend = feature_vector.shape[0]-1
         feature_vector = np.expand_dims(feature_vector, 0)
         probability_of_moves = self.model.predict(feature_vector)
+        printable_vector = [(i) for i in probability_of_moves[0]]
+        print(printable_vector)
         for i in range(0,loopend):
             if i not in legal_moves:
                 probability_of_moves[0,i] = 0.0 #Removing all non-legal moves from neural net prediction

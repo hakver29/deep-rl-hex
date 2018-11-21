@@ -78,7 +78,7 @@ def tree_search(rootstate, itermax, verbose=False, policy=None, policies=None, s
         print(rootnode.children_to_string())
 
     if save_training:
-        append_result_to_training_data(rootnode, rootstate, 3-state.toplay, itermax)
+        append_result_to_training_data(rootnode, rootstate, 3-rootstate.toplay, itermax)
     return max(rootnode.childNodes, key=lambda c: c.visits).move
 
 
@@ -149,6 +149,9 @@ def play_game(game_setting, policies=None, bad_mcts=False, bad_vs_good_neural_ne
 
 def append_result_to_training_data(rootnode, rootstate, toplay, itermax):
     target = [0] * game_setting.nr_of_legal_moves
+
+    if toplay == 2:
+        print("debug")
 
     for child_node in rootnode.childNodes:
         move = child_node.move[1]*game_setting.size+child_node.move[0]

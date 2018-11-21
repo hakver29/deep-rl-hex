@@ -32,7 +32,7 @@ class Topp:
                 print("\n" + str(i + 1) + ". best ANN vs. the " + str(k + 1) + " best ANN. Playing " + str(
                     self.G) + " games. Games are below.")
                 for m in range(0, self.G):
-                    result = self.play_game([self.policies[i][0], self.policies[k][0]],m)
+                    result = self.play_game([self.policies[i], self.policies[k]],m)
                     if result == 0:
                         self.policies[i][2] += 1
                         self.policies[k][3] += 1
@@ -55,14 +55,17 @@ class Topp:
         self.game_setting.P = playerdict[i%2+1]
         state = HexState1(self.game_setting)
         while (state.white_groups.connected(1, 2) == False and state.black_groups.connected(1, 2) == False):
+            print(state)
+            print(str(policies[state.toplay-1][1]) + " training cases network calculates.")
             random_num = random.uniform(0, 1)
             # If our random number exceeds epsilon, we let the ANN pick move. If not, the move is random.
             if random_num > self.epsilon:
                 #def select(self, feature_vector, legal_moves, stochastic=False):
-                policy = policies[state.toplay-1]
+                policy = policies[state.toplay-1][0]
                 legal_moves = [state.convertCoordinateToInteger(move) for move in state.moves()]
                 feature_vector = state.convertFeatureVectorToFormat(state.board.flatten('F'))
                 #print("Board representation sent to ANN: " + str(feature_vector))
+
 
                 start_time = time.time()  # We start counting the time.
                 integerMove = policy.select(feature_vector, legal_moves)
@@ -79,11 +82,10 @@ class Topp:
             elif state.toplay == 1:
                 state.place_white(move)
                 state.set_turn(2)
-            print(state)
 
             #print("\n\n")
         players = {1: "white", 2: "black"}
-        #print(state)
+        print(state)
         #print(players[state.winner()] + " wins.")
         return state.winner()-1
 

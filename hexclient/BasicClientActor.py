@@ -57,7 +57,7 @@ class BasicClientActor(BasicClientActorAbs):
         legal_moves = [hexstate.convertCoordinateToInteger(move) for move in rootnode.untried_moves]
 
         start_time = time.time()  # We start counting the time.
-        intMove = self.policy.select(hexstate.board.flatten('F'), legal_moves)
+        intMove = self.policy.select(hexstate.convertFeatureVectorToFormat(hexstate.board.flatten('F')), legal_moves)
         print("--- %s seconds ---" % (time.time() - start_time))  # How much time did we use?
         next_move = hexstate.convertIntegerToCoordinate(intMove)
 
