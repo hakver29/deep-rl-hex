@@ -4,8 +4,13 @@ from Node import *
 from HexState import *
 from GameSetting import *
 import copy
-from Policy import Policy
+from Policy import *
+import train_neural_net
+import keras
+from definitions import MODEL_DIR
 import os
+from hexclient.BasicClientActor import BasicClientActor as BSA
+import time
 
 def convertIntegerToCoordinate(intMove, boardSize):
     ycoordinate = intMove//boardSize
@@ -15,15 +20,6 @@ def convertIntegerToCoordinate(intMove, boardSize):
 
 def convertCoordinateToInteger(move, boardSize):
     return move[1]*boardSize + move[0]
-
-def convertFeatureVectorToFormat(feature_vector, toplay):
-    for i in range(0,len(feature_vector)):
-        if feature_vector[i] == float(toplay):
-            feature_vector[i] = 1
-        elif feature_vector[i] != 0.0:
-            feature_vector[i] = -1
-
-    return feature_vector
 
 def tree_search(rootstate, itermax, verbose=False, policy=None):
     rootnode = Node1(state=rootstate)
@@ -61,7 +57,7 @@ def tree_search(rootstate, itermax, verbose=False, policy=None):
             node = node.add_child(move, state)
 
         # Simulation
-        if policy is None:
+        if policies is None:
             # Simulation with random, vanilla MCTS if no neural net policy is defined.
             while state.winner() == 0:
                 state.play(random.choice(state.moves()))
@@ -71,11 +67,11 @@ def tree_search(rootstate, itermax, verbose=False, policy=None):
                 random_num = random.uniform(0, 1)
                 #If our random number exceeds epsilon, we let the ANN pick move. If not, the move is random.
                 if random_num>game_setting.epsilon:
-                    legal_moves = [convertCoordinateToInteger(move, game_setting.size) for move in state.moves()]
-                    flattened_move = policy.select(convertFeatureVectorToFormat(rootstate.board.flatten('F'), rootstate.toplay),
-                                            legal_moves)
+                    legal_moves = [state.convertCoordinateToInteger(move) for move in state.moves()]
+                    flattened_move = policies[state.toplay-1].select(state.convertFeatureVectorToFormat(rootstate.board.flatten('F'), rootstate.toplay),
+                                                     legal_moves)
                     assert (flattened_move in legal_moves)
-                    state.play(convertIntegerToCoordinate(flattened_move, game_setting.size))
+                    state.play(state.convertIntegerToCoordinate(flattened_move))
                 else:
                     state.play(random.choice(state.moves()))
 
@@ -88,19 +84,41 @@ def tree_search(rootstate, itermax, verbose=False, policy=None):
 
     if game_setting.verbose == True:
         print(rootnode.children_to_string())
-    append_result_to_training_data(rootnode, rootstate)
+
+    if save_training:
+        append_result_to_training_data(rootnode, rootstate)
     return max(rootnode.childNodes, key=lambda c: c.visits).move
 
 
-def play_game(game_setting, policy=None):
+def play_game(game_setting, policies=None, bad_mcts=False, bad_vs_good_neural_net=None):
     """
     Spiller et enkelt spill mellom to spillere
     """
+    #Bad mcts mode pits a strong mcts player versus a weak mcts player. The idea is make
+    #training data that teaches ANNs how to not only play vs strong players, but weak
+    #players too. Weak players make random moves in odd corners of the board that the
+    #ANN may respond erratically to.
     player_wins = {"black": 0, "white": 0}
     for i in range(game_setting.G):
         state = HexState1(game_setting)
         while (state.white_groups.connected(1,2) == False and state.black_groups.connected(1,2) == False):
-            move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose, policy=policy)
+            if bad_mcts:
+                if state.toplay == 2:
+                    move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose,
+                                       policies=None, save_training=True)
+                elif state.toplay == 1:
+                    move = tree_search(rootstate=state, itermax=game_setting.M//15, verbose=game_setting.verbose,
+                                       policies=None, save_training=False)
+            elif bad_vs_good_neural_net is not None:
+                #Bad neural net on first index, good neural net on second index
+                if state.toplay == 2:
+                    move = tree_search(rootstate=state, itermax=game_setting.M//2, verbose=game_setting.verbose,
+                                       policies=policies, save_training=True)
+                elif state.toplay == 1:
+                    move = tree_search(rootstate=state, itermax=game_setting.M//30, verbose=game_setting.verbose,
+                                       policies=policies, save_training=False)
+            else:
+                move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose, policies=policies)
             if state.toplay == 2:
                 state.place_black(move)
                 state.set_turn(1)
@@ -132,33 +150,66 @@ def play_game(game_setting, policy=None):
 
 
 def append_result_to_training_data(rootnode, rootstate):
-    target = [0] * game_setting.size**2
+    target = [0] * game_setting.nr_of_legal_moves
 
     for child_node in rootnode.childNodes:
         move = child_node.move[1]*game_setting.size+child_node.move[0]
         target[move] = child_node.visits/rootnode.visits
 
-    feature_vector = convertFeatureVectorToFormat(rootstate.board.flatten('F'),rootstate.toplay)
+    feature_vector = rootstate.convertFeatureVectorToFormat(rootstate.board.flatten('F'),rootstate.toplay)
 
     training_data_file.write(",".join(str(int(input)) for input in feature_vector)+"|"+",".join(str(target) for target in target)+"|"+"\n")
 
 
+start_time = time.time() #We start counting the time.
 
-game_setting = GameSetting()
+game_setting = GameSetting() #Load the game settings.
+
 file_path = training_data_file_path = DATA_DIR+'n'.join(str(dim) for dim in game_setting.network_dimensions)+"-"+str(time.time()+datetime.now().microsecond)+"-"+''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
 training_data_file = open(file_path, "w+")
-"""
-state = HexState1(game_setting)
-print(state)
-print(state.place_white((1,1)))
-print(state.place_black((0,0)))
-print(state.place_white((1,0)))
-print(state.place_black((0,1)))
-print(state)
-print(state.winner())
-"""
-play_game(game_setting)
-policy = Policy(game_setting)
-policy.import_all_data_and_train()
-play_game(game_setting,policy=policy)
-training_data_file.close()
+
+print("Vanilla MCTS")
+play_game(game_setting) #First, we play a vanilla MCTS game
+
+print("Bad vs good MCTS")
+play_game(game_setting, bad_mcts=True) #We play one bad vs one good mcts against each other, only saving the good data
+
+#print("bad vs good ANN"), play_game(game_setting, policies, bad_vs_good_neural_net=True)
+policies = [Policy(game_setting), Policy(game_setting)]
+policies[0].import_data_and_train(25) #Training ANN with a maximum of 25 cases
+policies[1].import_data_and_train() #Training ANN with all available training data
+
+
+#print("completely untrained ANN vs good ANN"), play_game(game_setting, policies, bad_vs_good_neural_net=True)
+policies = [Policy(game_setting), Policy(game_setting)]
+                                    #Note that the 0st neural net receives no training at all
+policies[1].import_data_and_train() #Training ANN with all available training data
+
+
+#print("good vs good ANN"), play_game(game_setting, policies=policies) #We play two ANNs against each other, saving the training data.
+policies = [Policy(game_setting), Policy(game_setting)]
+for policy in policies:
+    policy.import_data_and_train()
+
+
+
+training_data_file.close() #Wrapping up the training data file.
+#client = BSA()
+#client = BSA.BasicClientActor.connect_to_server()
+#print("yolo")
+#client.connect()
+#print("yolo")
+#client.connect_to_server()
+
+x,y = train_neural_net.read_training_data(game_setting.size)
+policy.train(x, y, batch_size = 50)
+#client = BSA()
+#client.connect_to_server()
+
+M = keras.models.load_model(ROOT_DIR + "model")
+#model.compile(loss='mean_squared_error',
+#            optimizer='Adam',
+#            metrics=['accuracy'])
+
+
+print("--- %s seconds ---" % (time.time() - start_time)) #How much time did we use?

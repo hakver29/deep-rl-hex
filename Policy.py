@@ -3,9 +3,35 @@ import numpy as np
 import tensorflow as tf
 from os import listdir
 from os.path import isfile, join
+import time
+import sys
+import warnings
 
 from GameSetting import GameSetting
-from definitions import DATA_DIR
+from definitions import DATA_DIR, MODEL_DIR, ROOT_DIR
+
+
+def scale_probabilities(vector, power):
+    for i in range(0, len(vector)):
+        vector[i] = vector[i]**power
+
+    return vector
+
+
+def stochastic_selection(probability_of_moves, legal_moves):
+    random_num = random.uniform(0,1)
+    sum = 0.0
+
+    for i in range (0,probability_of_moves.shape[1]):
+        if sum+probability_of_moves.item(i) > random_num:
+            return i
+        sum+=probability_of_moves.item(i)
+
+    warnings.warn("All moves had zero probability in neural net prediction.")
+
+    return random.choice(legal_moves)
+
+
 
 class Policy:
 
@@ -17,7 +43,8 @@ class Policy:
         ofunc = eval("tf.nn." + game_setting.output_function)
 
         self.model = tf.keras.models.Sequential() #Defining feed-forward neural net
-        self.model.add(tf.keras.layers.Dense(dims[0], input_shape=(dims[0],), activation=afunc)) #Add input layer
+        self.model.add(tf.keras.layers.Dense(dims[0], input_shape=(dims[0],), activation=afunc, kernel_initializer=
+tf.keras.initializers.Ones())) #Add input layer
         for i in range(1,len(dims)-1):
             self.model.add(tf.keras.layers.Dense(dims[i], activation=hfunc)) #add hidden layers
         self.model.add(tf.keras.layers.Dense(dims[len(dims)-1], activation=ofunc)) #add output layer
@@ -35,10 +62,15 @@ class Policy:
         probability_of_moves = self.model.predict_on_batch(feature_vector)
         for i in range(0,loopend):
             if i not in legal_moves:
-                probability_of_moves[0,i] = -10**6 #Removing all non-legal moves from neural net prediction
-
-        return probability_of_moves.argmax() #Returning the move with highest probability score
-                                                            #If several moves have equal probability, return random
+                probability_of_moves[0,i] = 0.0 #Removing all non-legal moves from neural net prediction
+        if self.game_setting.stochastic:
+            if self.game_setting.square_probabilities:
+                probability_of_moves = scale_probabilities(probability_of_moves, 2) #Squaring all probabilities before
+                                                                                #stochastic selection
+            probability_of_moves = probability_of_moves/probability_of_moves.sum()
+            return stochastic_selection(probability_of_moves, legal_moves)
+        else:
+            return probability_of_moves.argmax() #Returning the move with highest probability score
 
         #probability_of_moves = probability_of_moves/probability_of_moves.sum() #Adjusting all remaining probabilities
 
@@ -49,7 +81,7 @@ class Policy:
         targets = []
         for file_name in files_with_training_data:
             layer_dims = [int(x) for x in file_name.split("-")[0].split('n')]
-            if layer_dims[0] == self.game_setting.size ** 2 and layer_dims[len(layer_dims) - 1] == self.game_setting.size ** 2:
+            if layer_dims[0] == self.game_setting.nr_of_legal_moves and layer_dims[len(layer_dims) - 1] == self.game_setting.nr_of_legal_moves:
                 training_data = self.import_data_from_single_file(file_name)
                 features = features + training_data[0]
                 targets = targets + training_data[1]
@@ -70,20 +102,25 @@ class Policy:
 
         return features, targets
 
-    def train(self, feature_vectors, targets, batch_size=10):
+    def train(self, feature_vectors, targets, max_cases, batch_size=10):
         assert (len(feature_vectors) == len(targets))
         feature_vectors = np.array([np.array(feature_vector) for feature_vector in feature_vectors])
         targets = np.array([np.array(target) for target in targets])
 
-        for feature_vector in feature_vectors:
-            feature_vector = np.random.choice(feature_vector,len(feature_vectors)//2)
+        nr_of_cases = min(max_cases, int((self.game_setting.case_fraction*len(feature_vectors))//2))
+        indexes = np.random.choice(feature_vectors.shape[0], nr_of_cases, replace=False)
 
-        for target in targets:
-            target = np.random.choice(target, len(feature_vectors) // 2)
+        feature_vectors = feature_vectors[indexes, :]
+        targets = targets[indexes, :]
 
-        self.model.fit(feature_vectors, targets, epochs=self.game_setting.epochs, batch_size=batch_size)
+        self.model.fit(feature_vectors, targets, epochs=self.game_setting.epochs, batch_size=batch_size, shuffle=False)
+        if self.game_setting.display_summary:
+            self.model.summary()
+
         #tf.keras.utils.plot_model(self.model, to_file='model.png')
+        self.model.save("model")
+        return nr_of_cases
 
-    def import_all_data_and_train(self):
+    def import_data_and_train(self, max_cases=sys.maxsize):
         features, targets = self.read_all_training_data()
-        self.train(features, targets)
+        return self.train(features, targets, max_cases)
