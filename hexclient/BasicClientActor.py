@@ -3,7 +3,6 @@ import math
 from Policy import *
 from Node import *
 from HexState import *
-import keras
 import time
 
 def ConvertServerInput(state):
@@ -32,7 +31,7 @@ class BasicClientActor(BasicClientActorAbs):
     def __init__(self, IP_address = None,verbose=True):
         self.series_id = -1
         BasicClientActorAbs.__init__(self, IP_address,verbose=verbose)
-        self.model = keras.models.load_model(MODEL_DIR + "test1")
+        self.model = tf.keras.models.load_model(MODEL_DIR + "test1")
 
     def handle_get_action(self, state):
         """
@@ -58,9 +57,9 @@ class BasicClientActor(BasicClientActorAbs):
         policy = Policy(game_setting)
         hexstate = HexState1(gamesetting = game_setting, keith_state = state)
         rootnode = Node1(state=hexstate)
-        legal_moves = [convertCoordinateToInteger(move, game_setting.size) for move in rootnode.untried_moves]
+        legal_moves = [hexstate.convertCoordinateToInteger(move) for move in rootnode.untried_moves]
         intMove = policy.select(hexstate.board.flatten('F'), legal_moves)
-        next_move = convertIntegerToCoordinate(intMove, 5)
+        next_move = hexstate.convertIntegerToCoordinate(intMove)
         #next_move = tuple(self.pick_random_free_cell(state, size=int(math.sqrt(len(state) - 1))))
         #############################
         #

@@ -21,7 +21,7 @@ class Topp:
 
         for i in range(0,self.K):
             policy = Policy(self.game_setting)
-            nr_of_cases = max_cases//(((i+1)**3))
+            nr_of_cases = max_cases//((i+1))
             actual_nr_of_cases = policy.import_data_and_train(max_cases=nr_of_cases)
             self.policies.append([policy, actual_nr_of_cases, 0,0])
 

@@ -6,7 +6,6 @@ from GameSetting import *
 import copy
 from Policy import *
 import train_neural_net
-import keras
 from definitions import MODEL_DIR
 import os
 from hexclient.BasicClientActor import BasicClientActor as BSA
@@ -21,7 +20,7 @@ def convertIntegerToCoordinate(intMove, boardSize):
 def convertCoordinateToInteger(move, boardSize):
     return move[1]*boardSize + move[0]
 
-def tree_search(rootstate, itermax, verbose=False, policy=None):
+def tree_search(rootstate, itermax, verbose=False, policy=None, policies=None, save_training=True):
     rootnode = Node1(state=rootstate)
     for i in range(itermax):
         node = rootnode
@@ -160,7 +159,6 @@ def append_result_to_training_data(rootnode, rootstate):
 
     training_data_file.write(",".join(str(int(input)) for input in feature_vector)+"|"+",".join(str(target) for target in target)+"|"+"\n")
 
-
 start_time = time.time() #We start counting the time.
 
 game_setting = GameSetting() #Load the game settings.
@@ -174,23 +172,23 @@ play_game(game_setting) #First, we play a vanilla MCTS game
 print("Bad vs good MCTS")
 play_game(game_setting, bad_mcts=True) #We play one bad vs one good mcts against each other, only saving the good data
 
-#print("bad vs good ANN"), play_game(game_setting, policies, bad_vs_good_neural_net=True)
+
 policies = [Policy(game_setting), Policy(game_setting)]
 policies[0].import_data_and_train(25) #Training ANN with a maximum of 25 cases
 policies[1].import_data_and_train() #Training ANN with all available training data
+print("bad vs good ANN"), play_game(game_setting, policies, bad_vs_good_neural_net=True)
 
 
-#print("completely untrained ANN vs good ANN"), play_game(game_setting, policies, bad_vs_good_neural_net=True)
 policies = [Policy(game_setting), Policy(game_setting)]
                                     #Note that the 0st neural net receives no training at all
 policies[1].import_data_and_train() #Training ANN with all available training data
+print("completely untrained ANN vs good ANN"), play_game(game_setting, policies, bad_vs_good_neural_net=True)
 
 
-#print("good vs good ANN"), play_game(game_setting, policies=policies) #We play two ANNs against each other, saving the training data.
 policies = [Policy(game_setting), Policy(game_setting)]
 for policy in policies:
     policy.import_data_and_train()
-
+print("good vs good ANN"), play_game(game_setting, policies=policies) #We play two ANNs against each other, saving the training data.
 
 
 training_data_file.close() #Wrapping up the training data file.
@@ -201,12 +199,10 @@ training_data_file.close() #Wrapping up the training data file.
 #print("yolo")
 #client.connect_to_server()
 
-x,y = train_neural_net.read_training_data(game_setting.size)
-policy.train(x, y, batch_size = 50)
 #client = BSA()
 #client.connect_to_server()
 
-M = keras.models.load_model(ROOT_DIR + "model")
+M = tf.keras.models.load_model(ROOT_DIR + "model")
 #model.compile(loss='mean_squared_error',
 #            optimizer='Adam',
 #            metrics=['accuracy'])
