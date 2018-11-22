@@ -22,8 +22,9 @@ def stochastic_selection(probability_of_moves, legal_moves):
     random_num = random.uniform(0,1)
     sum = 0.0
 
-    for i in range (0,probability_of_moves.shape[1]):
+    for i in range(0, probability_of_moves.shape[1]):
         if sum+probability_of_moves.item(i) > random_num:
+            print("Selected move had " + str(probability_of_moves.item(i)*100)[0:4] + "% probability of being selected.")
             return i
         sum+=probability_of_moves.item(i)
 
@@ -66,8 +67,8 @@ tf.keras.initializers.Ones())) #Add input layer
             if i not in legal_moves:
                 probability_of_moves[0,i] = 0.0 #Removing all non-legal moves from neural net prediction
         if self.game_setting.stochastic:
-            if self.game_setting.square_probabilities:
-                probability_of_moves = scale_probabilities(probability_of_moves, 2) #Squaring all probabilities before
+            if self.game_setting.raise_probabilities_power > 1:
+                probability_of_moves = scale_probabilities(probability_of_moves, self.game_setting.raise_probabilities_power) #Squaring all probabilities before
                                                                                 #stochastic selection
             probability_of_moves = probability_of_moves/probability_of_moves.sum()
             return stochastic_selection(probability_of_moves, legal_moves)
@@ -112,7 +113,7 @@ tf.keras.initializers.Ones())) #Add input layer
         feature_vectors = np.array([np.array(feature_vector) for feature_vector in feature_vectors])
         targets = np.array([np.array(target) for target in targets])
 
-        nr_of_cases = min(max_cases, int((self.game_setting.case_fraction*len(feature_vectors))//2))
+        nr_of_cases = min(max_cases, int((self.game_setting.case_fraction*len(feature_vectors))))
         indexes = np.random.choice(feature_vectors.shape[0], nr_of_cases, replace=False)
 
         feature_vectors = feature_vectors[indexes, :]

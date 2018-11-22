@@ -15,6 +15,7 @@ class Topp:
         self.max_cases = game_setting.max_cases
         self.policies = []
         self.epsilon = game_setting.topp_epsilon
+        self.negative_training_power = game_setting.negative_training_power
 
     def train_policies(self):
         policy = Policy(self.game_setting)
@@ -22,7 +23,7 @@ class Topp:
 
         for i in range(0,self.K):
             policy = Policy(self.game_setting)
-            nr_of_cases = max_cases//((i+1))
+            nr_of_cases = max(1,max_cases//((i+1)**self.negative_training_power))
             actual_nr_of_cases = policy.import_data_and_train(max_cases=nr_of_cases)
             self.policies.append([policy, actual_nr_of_cases, 0,0])
 

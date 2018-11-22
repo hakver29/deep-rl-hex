@@ -33,7 +33,7 @@ class GameSetting:
         self.epsilon = float(neural_net_config['epsilon'])
         self.case_fraction = float(neural_net_config['case_fraction'])
         self.stochastic = bool(neural_net_config['stochastic'])
-        self.square_probabilities = bool(neural_net_config['square_probabilities'])
+        self.raise_probabilities_power = int(neural_net_config['raise_probabilities_power'])
         self.display_summary = bool(neural_net_config['display_summary'])
 
         self.K = int(topp_config['K'])
@@ -41,6 +41,7 @@ class GameSetting:
         self.max_cases = int(topp_config['nr_of_training_cases'])
         self.topp_epsilon = float(topp_config['epsilon'])
         self.topp_epochs = int(topp_config['epochs'])
+        self.negative_training_power = int(topp_config['negative_training_power'])
 
     def read_network_dimensions(self, hidden_layer_dims):
 

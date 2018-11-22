@@ -1,5 +1,6 @@
-K: 3
-G: 500
-nr_of_training_cases: 200
+K: 4
+G: 20
+nr_of_training_cases: 1000
 epsilon: 0.0
-epochs: 10
+epochs: 15
+negative_training_power: 4 #The higher this number, the less relative training will the inferior networks receive.

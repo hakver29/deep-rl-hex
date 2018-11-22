@@ -1,5 +1,5 @@
-G: 10 # Number of games played
+G: 20 # Number of games played
 P: "black" # Starting player
-M: 1000 # Number of simulations
+M: 2400 # Number of simulations
 verbose: False
-size: 2 # Length of each side
+size: 4 # Length of each side

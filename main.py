@@ -13,7 +13,7 @@ from hexclient.BasicClientActor import BasicClientActor as BSA
 import time
 
 
-def tree_search(rootstate, itermax, verbose=False, policy=None, policies=None, save_training=True):
+def tree_search(rootstate, itermax, verbose=False, policy=None, policies=None, save_training=True, moves_are_random=False):
     rootnode = Node1(state=rootstate)
     for i in range(itermax):
         node = rootnode
@@ -78,11 +78,15 @@ def tree_search(rootstate, itermax, verbose=False, policy=None, policies=None, s
         print(rootnode.children_to_string())
 
     if save_training:
-        append_result_to_training_data(rootnode, rootstate, 3-rootstate.toplay, itermax)
-    return max(rootnode.childNodes, key=lambda c: c.visits).move
+        append_result_to_training_data(rootnode, rootstate, rootstate.toplay, itermax)
+
+    if moves_are_random:
+        return random.choice(rootnode.childNodes).move
+    else:
+        return max(rootnode.childNodes, key=lambda c: c.visits).move
 
 
-def play_game(game_setting, policies=None, bad_mcts=False, bad_vs_good_neural_net=None):
+def play_game(game_setting, policies=None, bad_mcts=False, bad_vs_good_neural_net=None, moves_are_random=False):
     """
     Spiller et enkelt spill mellom to spillere
     """
@@ -97,23 +101,24 @@ def play_game(game_setting, policies=None, bad_mcts=False, bad_vs_good_neural_ne
         state = HexState1(game_setting)
         while (state.white_groups.connected(1,2) == False and state.black_groups.connected(1,2) == False):
             if bad_mcts:
-                ttoplay = random.randint(1,2)
-                if state.toplay == 1:
+                genius_player = random.randint(1,2)
+                if state.toplay == genius_player:
                     move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose,
-                                       policies=None, save_training=True)
-                elif state.toplay == 2:
+                                       policies=None, save_training=True, moves_are_random=moves_are_random)
+                elif state.toplay == 3-genius_player:
                     move = tree_search(rootstate=state, itermax=1, verbose=game_setting.verbose,
-                                       policies=None, save_training=False)
+                                       policies=None, save_training=False, moves_are_random=moves_are_random)
             elif bad_vs_good_neural_net is not None:
                 #Bad neural net on first index, good neural net on second index
                 if state.toplay == 2:
                     move = tree_search(rootstate=state, itermax=game_setting.M//2, verbose=game_setting.verbose,
-                                       policies=policies, save_training=True)
+                                       policies=policies, save_training=True, moves_are_random=moves_are_random)
                 elif state.toplay == 1:
                     move = tree_search(rootstate=state, itermax=game_setting.M//30, verbose=game_setting.verbose,
-                                       policies=policies, save_training=False)
+                                       policies=policies, save_training=False, moves_are_random=moves_are_random)
             else:
-                move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose, policies=policies)
+                move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose,
+                                        moves_are_random = moves_are_random, policies=policies)
             if state.toplay == 2:
                 state.place_black(move)
                 state.set_turn(1)
@@ -147,19 +152,23 @@ def play_game(game_setting, policies=None, bad_mcts=False, bad_vs_good_neural_ne
 
 
 
-def append_result_to_training_data(rootnode, rootstate, toplay, itermax):
+def append_result_to_training_data(rootnode, rootstate, toplay, itermax,moves_are_random=False):
     target = [0] * game_setting.nr_of_legal_moves
 
-    if toplay == 2:
-        print("debug")
+    #if toplay == 2:
+        #print("debug")
 
     for child_node in rootnode.childNodes:
         move = child_node.move[1]*game_setting.size+child_node.move[0]
         target[move] = child_node.visits/rootnode.visits
 
     feature_vector = convertFeatureVectorToFormat(rootstate.board.flatten('F'), toplay)
-
-    training_data_file.write(",".join(str(int(input)) for input in feature_vector)+"|"+",".join(str(target) for target in target)+"|"+str(itermax)+"\n")
+    #print(",".join(str(int(input)) for input in feature_vector)+"|"+",".join(str(target) for target in target)+"|"+str(itermax)+"\n")
+    if moves_are_random:
+        training_data_file.write(",".join(str(int(input)) for input in feature_vector) + "|" + ",".join(
+            str(target) for target in target) + "|" + str(itermax) + "|" + "random move\n")
+    else:
+        training_data_file.write(",".join(str(int(input)) for input in feature_vector)+"|"+",".join(str(target) for target in target)+"|"+str(itermax)+"\n")
 
 start_time = time.time() #We start counting the time.
 
@@ -168,8 +177,12 @@ game_setting = GameSetting() #Load the game settings.
 file_path = training_data_file_path = DATA_DIR+'n'.join(str(dim) for dim in game_setting.network_dimensions)+"-"+str(time.time()+datetime.now().microsecond)+"-"+''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
 training_data_file = open(file_path, "w+")
 
-#print("Vanilla MCTS")
-#play_game(game_setting) #First, we play a vanilla MCTS game
+print("Vanilla MCTS")
+play_game(game_setting) #First, we play a vanilla MCTS game
+
+print("Random move MCTS")
+play_game(game_setting, moves_are_random=True) #We let the moves be random, but each position is
+                        # evaluated accurately by the MCTS algorithm and saved for training.
 
 print("Bad vs good MCTS")
 play_game(game_setting, bad_mcts=True) #We play one bad vs one good mcts against each other, only saving the good data
