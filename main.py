@@ -78,7 +78,7 @@ def tree_search(rootstate, itermax, verbose=False, policy=None, policies=None, s
         print(rootnode.children_to_string())
 
     if save_training:
-        append_result_to_training_data(rootnode, rootstate, rootstate.toplay, itermax)
+        append_result_to_training_data(rootnode, rootstate, rootstate.toplay, itermax, moves_are_random=moves_are_random)
 
     if moves_are_random:
         return random.choice(rootnode.childNodes).move
