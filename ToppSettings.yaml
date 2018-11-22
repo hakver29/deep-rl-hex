@@ -1,6 +1,7 @@
 K: 4
-G: 20
-nr_of_training_cases: 1000
-epsilon: 0.0
-epochs: 15
+G: 300
+nr_of_training_cases: 100000
+epsilon: 0.30
+epochs: 10
 negative_training_power: 4 #The higher this number, the less relative training will the inferior networks receive.
+load_best_policy: False

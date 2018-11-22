@@ -42,6 +42,7 @@ class GameSetting:
         self.topp_epsilon = float(topp_config['epsilon'])
         self.topp_epochs = int(topp_config['epochs'])
         self.negative_training_power = int(topp_config['negative_training_power'])
+        self.load_best_policy = bool(topp_config['load_best_policy'])
 
     def read_network_dimensions(self, hidden_layer_dims):
 

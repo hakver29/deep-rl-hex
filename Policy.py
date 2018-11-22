@@ -26,10 +26,15 @@ def stochastic_selection(probability_of_moves, legal_moves):
         if sum+probability_of_moves.item(i) > random_num:
             print("Selected move had " + str(probability_of_moves.item(i)*100)[0:4] + "% probability of being selected.")
             return i
+        if i>0 and sum + probability_of_moves.item(i) >= random_num:
+            print("Selected move had " + str(probability_of_moves.item(i) * 100)[
+                                         0:4] + "% probability of being selected.")
+            return i
         sum+=probability_of_moves.item(i)
 
     warnings.warn("All moves had zero probability in neural net prediction.")
 
+    print("RANDOMLY selected move. All moves had zero probability in prediction.")
     return random.choice(legal_moves)
 
 
@@ -130,3 +135,36 @@ tf.keras.initializers.Ones())) #Add input layer
     def import_data_and_train(self, max_cases=sys.maxsize):
         features, targets = self.read_all_training_data()
         return self.train(features, targets, max_cases)
+
+    def load_best_model(self):
+
+        file_path_best_model, nr__of_training_cases = self.find_file_path_of_best_model()
+        self.model = tf.keras.models.load_model(file_path_best_model)
+        print("Loaded best model from storage.")
+        return nr__of_training_cases
+
+    def find_file_path_of_best_model(self):
+        files_with_correct_dimensions = []
+
+        path = MODEL_DIR
+        files_with_training_data = [f for f in listdir(path) if isfile(join(path, f))]
+        for file_name in files_with_training_data:
+            input_size = int(file_name.split("-")[0])
+            if input_size == self.game_setting.nr_of_legal_moves+1:
+                files_with_correct_dimensions.append(file_name)
+
+        highest_win_rate = 0.0
+        highest_win_rate_file = 0
+        training_cases = 0
+
+        for file_name in files_with_correct_dimensions:
+            win_rate = float(file_name.split("-")[1])
+            if win_rate>=highest_win_rate:
+                highest_win_rate = win_rate
+                highest_win_rate_file = file_name
+                training_cases = int(file_name.split("-")[2])
+
+        if highest_win_rate_file == 0:
+            raise ValueError("Could not find file with highest win rate.")
+
+        return MODEL_DIR+highest_win_rate_file, training_cases
