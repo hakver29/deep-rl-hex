@@ -1,17 +1,20 @@
-#from Node import *
-#from HexState import *
-from Node import *
+import copy
+
+from GameSetting import *
 from HexState import *
 from HexState import convertFeatureVectorToFormat
-from GameSetting import *
-import copy
+from Node import *
 from Policy import *
-import train_neural_net
 from definitions import REINFORCEMENT_MODEL_DIR
-import os
-from hexclient.BasicClientActor import BasicClientActor as BSA
-import time
 
+
+def get_save_model_indices():
+    indices = []
+    for i in range(0, game_setting.K-1):
+        factor = i/(game_setting.K-1)
+        indices.append(int(factor * game_setting.G))
+    indices.append(game_setting.G)
+    return indices
 
 def tree_search(rootstate, itermax, verbose=False, policy=None, policies=None, save_training=True, moves_are_random=False):
     rootnode = Node1(state=rootstate)
@@ -92,7 +95,7 @@ def tree_search(rootstate, itermax, verbose=False, policy=None, policies=None, s
 def play_game(game_setting, game_func, policies=None):
     if policies[0] is not None and policies[0] is policies[1]:
         reinforcement_learning = True
-        episodes_until_next_model_save = game_setting.G//(game_setting.K-1)
+        save_model_at_indices = get_save_model_indices()
     else:
         reinforcement_learning = False
 
@@ -102,12 +105,9 @@ def play_game(game_setting, game_func, policies=None):
         game_setting.P = playerdict[i%2 + 1]
         state = HexState1(game_setting)
 
-        if reinforcement_learning:
-            episodes_until_next_model_save -= 1
-            if episodes_until_next_model_save == 0 or i==0:
-                file_name = str(game_setting.network_dimensions[0]) + "-NA-" + str(i) + "-" + str(int(time.time()))
-                policies[0].model.save(REINFORCEMENT_MODEL_DIR + file_name)
-                episodes_until_next_model_save = game_setting.G // (game_setting.K-1)
+        if reinforcement_learning and i in save_model_at_indices:
+            file_name = str(game_setting.network_dimensions[0]) + "-NA-" + str(i) + "-" + str(int(time.time()))
+            policies[0].model.save(REINFORCEMENT_MODEL_DIR + file_name)
 
         while state.winner() == 0:
             move = game_func(state, policies)
@@ -149,6 +149,10 @@ def play_game(game_setting, game_func, policies=None):
                 policies[0].model.summary()
 
         del replay_buffer[:]
+
+    if reinforcement_learning:
+        file_name = str(game_setting.network_dimensions[0]) + "-NA-" + str(game_setting.G) + "-" + str(int(time.time()))
+        policies[0].model.save(REINFORCEMENT_MODEL_DIR + file_name)
 
     print(player_wins)
 

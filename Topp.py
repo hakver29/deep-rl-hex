@@ -59,7 +59,8 @@ class Topp:
     def play_tournament(self):
         for i in range(0,self.K-1):
             for k in range (i+1,self.K):
-                print("\n" + str(i + 1) + ". best ANN vs. the " + str(k + 1) + " best ANN. Playing " + str(
+                if self.game_setting.verbose >= 2:
+                    print("\n" + str(i + 1) + ". best ANN vs. the " + str(k + 1) + " best ANN. Playing " + str(
                     self.G) + " games. Games are below.")
                 for m in range(0, self.G):
                     result = self.play_game([self.policies[i], self.policies[k]],m)
@@ -101,7 +102,7 @@ class Topp:
         self.game_setting.P = playerdict[i%2+1]
         state = HexState1(self.game_setting)
         while (state.white_groups.connected(1, 2) == False and state.black_groups.connected(1, 2) == False):
-            if self.game_setting.verbose >= 1:
+            if self.game_setting.verbose >= 2:
                 print(state)
             if self.game_setting.verbose >= 3:
                 print(str(policies[state.toplay-1][1]) + " training cases network calculates.")
