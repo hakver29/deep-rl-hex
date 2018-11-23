@@ -28,13 +28,16 @@ def ConvertServerInput(state):
     return ANN_input
 
 class BasicClientActor(BasicClientActorAbs):
-    def __init__(self, IP_address = None,verbose=True):
+    def __init__(self, IP_address=None, verbose=True, load_best_model=True):
         self.series_id = -1
         BasicClientActorAbs.__init__(self, IP_address,verbose=verbose)
         #self.model = tf.keras.models.load_model(MODEL_DIR + "test1")
         self.game_setting = GameSetting()
         self.policy = Policy(self.game_setting)
-        self.policy.import_data_and_train()
+        if load_best_model:
+            self.policy.load_best_model()
+        else:
+            self.policy.import_data_and_train()
 
     def handle_get_action(self, state):
         """
