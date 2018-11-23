@@ -17,7 +17,7 @@ class GameSetting:
         self.G = game_config["G"]
         self.P = game_config["P"]
         self.M = game_config["M"]
-        self.verbose = game_config["verbose"]
+        self.verbose = int(game_config["verbose"])
         self.size = game_config["size"]
         self.nr_of_legal_moves = self.size**2
 
@@ -42,6 +42,8 @@ class GameSetting:
         self.topp_epsilon = float(topp_config['epsilon'])
         self.topp_epochs = int(topp_config['epochs'])
         self.negative_training_power = int(topp_config['negative_training_power'])
+        self.load_best_policy = bool(topp_config['load_best_policy'])
+        self.load_reinforcement = bool(topp_config['load_reinforcement'])
 
     def read_network_dimensions(self, hidden_layer_dims):
 

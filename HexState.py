@@ -2,30 +2,21 @@ import numpy as np
 from unionfind import unionfind
 
 class HexState1:
-    """
-    Stores information representing the current state of a game of hex, namely
-    the board and the current turn. Also provides functions for playing the game
-    and returning information about it.
-    """
-    #dictionary associating numbers with players for book keeping
+    # Representerer en state av brettet i Hex
+
+    # Oversikt av spillere
     PLAYERS = {"none" : 0, "white" : 1, "black" : 2}
 
-    #move value of -1 indicates the game has ended so no move is possible
-    GAMEOVER = -1
-
-    #represent edges in the union find strucure for win detection
+    # Representasjon av kantene i spillet
+    # Brukes i UnionFind
     EDGE1 = 1
     EDGE2 = 2
 
     neighbor_patterns = ((-1,0), (0,-1), (-1,1), (0,1), (1,0), (1,-1))
 
     def __init__(self, gamesetting, keith_state = None):
-        """
-        Initialize the game board and give white first turn.
-        Also create our union find structures for win checking.
-        """
+        # Initialiserer HexState
         self.size = gamesetting.size
-        #self.toplay = self.PLAYERS["white"]
         if keith_state == None:
             self.toplay = self.PLAYERS[gamesetting.P]
             self.board = np.zeros((gamesetting.size, gamesetting.size))
@@ -39,9 +30,7 @@ class HexState1:
         self.black_groups = unionfind()
 
     def play(self, cell):
-        """
-        Play a stone of the current turns color in the passed cell.
-        """
+        # Plasserer en brikke
         if(self.toplay == self.PLAYERS["white"]):
             self.place_white(cell)
             self.set_turn(2)
@@ -50,65 +39,47 @@ class HexState1:
             self.set_turn(1)
 
     def place_white(self, cell):
-        """
-        Place a white stone regardless of whose turn it is.
-        """
+        # Plasserer en brikke av type Player 1
         if(self.board[cell] == self.PLAYERS["none"]):
             self.board[cell] = self.PLAYERS["white"]
         else:
             raise ValueError("Cell occupied")
-        #if the placed cell touches a white edge connect it appropriately
+
         if(cell[0] == 0):
             self.white_groups.join(self.EDGE1, cell)
         if(cell[0] == self.size -1):
             self.white_groups.join(self.EDGE2, cell)
-        #join any groups connected by the new white stone
+
         for n in self.neighbors(cell):
             if(self.board[n] == self.PLAYERS["white"]):
                 self.white_groups.join(n, cell)
 
     def place_black(self, cell):
-        """
-        Place a black stone regardless of whose turn it is.
-        """
+        # Plasserer en brikke av type Player 2
         if(self.board[cell] == self.PLAYERS["none"]):
             self.board[cell] = self.PLAYERS["black"]
         else:
             raise ValueError("Cell occupied")
-        #if the placed cell touches a black edge connect it appropriately
+
         if(cell[1] == 0):
             self.black_groups.join(self.EDGE1, cell)
         if(cell[1] == self.size -1):
             self.black_groups.join(self.EDGE2, cell)
-        #join any groups connected by the new black stone
+
         for n in self.neighbors(cell):
             if(self.board[n] == self.PLAYERS["black"]):
                 self.black_groups.join(n, cell)
 
-    def clone(self):
-        st = HexState1(self.gamesetting)
-        return st
-
-    def turn(self):
-        """
-        Return the player with the next move.
-        """
-        return self.toplay
-
     def set_turn(self, player):
-        """
-        Set the player to take the next move.
-        """
+        # Setter hvem det er sin tur
         if(player in self.PLAYERS.values() and player !=self.PLAYERS["none"]):
             self.toplay = player
         else:
             raise ValueError('Invalid turn: ' + str(player))
 
     def winner(self):
-        """
-        Return a number corresponding to the winning player,
-        or none if the game is not over.
-        """
+        # Returnerer vinneren av spillet (1/2)
+        # Returnerer 0 hvis ingen har vunnet
         if(self.white_groups.connected(self.EDGE1, self.EDGE2)):
             return self.PLAYERS["white"]
         elif(self.black_groups.connected(self.EDGE1, self.EDGE2)):
@@ -117,27 +88,21 @@ class HexState1:
             return self.PLAYERS["none"]
 
     def get_result(self, playertp):
-        """
-        Returnerer resultatet fra playerjm sitt ståsted
-        """
+        # Returnerer resultatet fra playerjm sitt ståsted
         if self.toplay == playertp:
             return 1.0
         else:
             return 0.0
 
     def neighbors(self, cell):
-        """
-        Return list of neighbors of the passed cell.
-        """
+        # Returnerer naboene til cell
         x = cell[0]
         y = cell[1]
         return [(n[0]+x , n[1]+y) for n in self.neighbor_patterns\
             if (0<=n[0]+x and n[0]+x<self.size and 0<=n[1]+y and n[1]+y<self.size)]
 
     def moves(self):
-        """
-        Get a list of all moves possible on the current board.
-        """
+        # Returnerer tilgjengelige moves til en state
         moves = []
         for y in range(self.size):
             for x in range(self.size):
@@ -146,31 +111,24 @@ class HexState1:
         return moves
 
     def convertIntegerToCoordinate(self, intMove):
+        # Hjelpefunksjon
         ycoordinate = intMove // self.size
         xcoordinate = intMove % self.size
         return xcoordinate, ycoordinate
 
     def convertCoordinateToInteger(self, move):
+        # Hjelpefunksjon
         return move[1] * self.size + move[0]
 
     def convertFeatureVectorToFormat(self, feature_vector):
+        # Hjelpefunksjon
         feature_vector = feature_vector.tolist()
         feature_vector.insert(0,self.toplay)
         feature_vector = np.array(feature_vector)
         return feature_vector
-        """
-        for i in range(0, len(feature_vector)):
-            if feature_vector[i] == float(toplay):
-                feature_vector[i] = 1
-            elif feature_vector[i] == float(toplay%2+1):
-                feature_vector[i] = -1
-
-        return feature_vector"""
 
     def __str__(self):
-        """
-        Print an ascii representation of the game board.
-        """
+        # Printer representasjon av brettet
         white = 'O'
         black = '@'
         empty = '.'
@@ -197,6 +155,7 @@ class HexState1:
         return ret
 
 def convertFeatureVectorToFormat(feature_vector, toplay):
+    # Hjelpefunksjon
     feature_vector = feature_vector.tolist()
     feature_vector.insert(0,toplay)
     feature_vector = np.array(feature_vector)

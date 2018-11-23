@@ -8,29 +8,7 @@ import sys
 import warnings
 
 from GameSetting import GameSetting
-from definitions import DATA_DIR, MODEL_DIR, ROOT_DIR
-
-
-def scale_probabilities(vector, power):
-    for i in range(0, len(vector)):
-        vector[i] = vector[i]**power
-
-    return vector
-
-
-def stochastic_selection(probability_of_moves, legal_moves):
-    random_num = random.uniform(0,1)
-    sum = 0.0
-
-    for i in range(0, probability_of_moves.shape[1]):
-        if sum+probability_of_moves.item(i) > random_num:
-            print("Selected move had " + str(probability_of_moves.item(i)*100)[0:4] + "% probability of being selected.")
-            return i
-        sum+=probability_of_moves.item(i)
-
-    warnings.warn("All moves had zero probability in neural net prediction.")
-
-    return random.choice(legal_moves)
+from definitions import DATA_DIR, MODEL_DIR, ROOT_DIR, REINFORCEMENT_MODEL_DIR
 
 
 
@@ -56,22 +34,52 @@ tf.keras.initializers.Ones())) #Add input layer
 
         self.model.compile(optimizer=optimizer, loss=game_setting.loss_function, metrics=[game_setting.metrics])
 
+    def scale_probabilities(self, vector, power):
+        for i in range(0, len(vector)):
+            vector[i] = vector[i] ** power
+
+        return vector
+
+    def stochastic_selection(self, probability_of_moves, legal_moves):
+        random_num = random.uniform(0, 1)
+        sum = 0.0
+
+        for i in range(0, probability_of_moves.shape[1]):
+            if sum + probability_of_moves.item(i) > random_num:
+                if self.game_setting.verbose >= 3:
+                    print("Selected move had " + str(probability_of_moves.item(i) * 100)[
+                                                 0:4] + "% probability of being selected.")
+                return i
+            if i > 0 and sum + probability_of_moves.item(i) >= random_num:
+                if self.game_setting.verbose >= 3:
+                    print("Selected move had " + str(probability_of_moves.item(i) * 100)[
+                                             0:4] + "% probability of being selected.")
+                return i
+            sum += probability_of_moves.item(i)
+
+        warnings.warn("All moves had zero probability in neural net prediction.")
+
+        if self.game_setting.verbose >= 3:
+            print("RANDOMLY selected move. All moves had zero probability in prediction.")
+        return random.choice(legal_moves)
+
     def select(self, feature_vector, legal_moves):
         feature_vector = np.array(feature_vector)
         loopend = feature_vector.shape[0]-1
         feature_vector = np.expand_dims(feature_vector, 0)
         probability_of_moves = self.model.predict(feature_vector)
         printable_vector = [(i) for i in probability_of_moves[0]]
-        print(printable_vector)
+        if self.game_setting.verbose >= 3:
+            print(printable_vector)
         for i in range(0,loopend):
             if i not in legal_moves:
                 probability_of_moves[0,i] = 0.0 #Removing all non-legal moves from neural net prediction
         if self.game_setting.stochastic:
             if self.game_setting.raise_probabilities_power > 1:
-                probability_of_moves = scale_probabilities(probability_of_moves, self.game_setting.raise_probabilities_power) #Squaring all probabilities before
+                probability_of_moves = self.scale_probabilities(probability_of_moves, self.game_setting.raise_probabilities_power) #Squaring all probabilities before
                                                                                 #stochastic selection
             probability_of_moves = probability_of_moves/probability_of_moves.sum()
-            return stochastic_selection(probability_of_moves, legal_moves)
+            return self.stochastic_selection(probability_of_moves, legal_moves)
         else:
             for i in range(0, loopend):
                 if i not in legal_moves:
@@ -80,17 +88,23 @@ tf.keras.initializers.Ones())) #Add input layer
 
             #probability_of_moves = probability_of_moves/probability_of_moves.sum() #Adjusting all remaining probabilities
 
-    def read_all_training_data(self):
+    def read_all_training_data(self, training_file=None):
         path = DATA_DIR
         files_with_training_data = [f for f in listdir(path) if isfile(join(path, f))]
         features = []
         targets = []
-        for file_name in files_with_training_data:
-            layer_dims = [int(x) for x in file_name.split("-")[0].split('n')]
-            if layer_dims[0] == self.game_setting.nr_of_legal_moves+1 and layer_dims[len(layer_dims) - 1] == self.game_setting.nr_of_legal_moves:
-                training_data = self.import_data_from_single_file(file_name)
-                features = features + training_data[0]
-                targets = targets + training_data[1]
+        if training_file is not None:
+            training_data = self.import_data_from_single_file(training_file)
+            features = features + training_data[0]
+            targets = targets + training_data[1]
+            return features, targets
+        else:
+            for file_name in files_with_training_data:
+                layer_dims = [int(x) for x in file_name.split("-")[0].split('n')]
+                if layer_dims[0] == self.game_setting.nr_of_legal_moves+1 and layer_dims[len(layer_dims) - 1] == self.game_setting.nr_of_legal_moves:
+                    training_data = self.import_data_from_single_file(file_name)
+                    features = features + training_data[0]
+                    targets = targets + training_data[1]
 
         assert len(features) > 10
         assert len(targets) > 10
@@ -127,6 +141,58 @@ tf.keras.initializers.Ones())) #Add input layer
         #self.model.save("model")
         return nr_of_cases
 
-    def import_data_and_train(self, max_cases=sys.maxsize):
-        features, targets = self.read_all_training_data()
+    def import_data_and_train(self, max_cases=sys.maxsize, training_file=None):
+        features, targets = self.read_all_training_data(training_file=None)
         return self.train(features, targets, max_cases)
+
+    def load_best_model(self):
+
+        file_path_best_model, nr__of_training_cases = self.find_file_path_of_best_model()
+        self.model = tf.keras.models.load_model(file_path_best_model)
+        if self.game_setting.verbose >= 1:
+            print("Loaded best model from storage.")
+        return nr__of_training_cases
+
+    def find_file_path_of_best_model(self):
+        files_with_correct_dimensions = []
+
+        path = MODEL_DIR
+        files_with_training_data = [f for f in listdir(path) if isfile(join(path, f))]
+        for file_name in files_with_training_data:
+            input_size = int(file_name.split("-")[0])
+            if input_size == self.game_setting.nr_of_legal_moves+1:
+                files_with_correct_dimensions.append(file_name)
+
+        highest_win_rate = 0.0
+        highest_win_rate_file = 0
+        training_cases = 0
+
+        for file_name in files_with_correct_dimensions:
+            win_rate = float(file_name.split("-")[1])
+            if win_rate>=highest_win_rate:
+                highest_win_rate = win_rate
+                highest_win_rate_file = file_name
+                training_cases = int(file_name.split("-")[2])
+
+        if highest_win_rate_file == 0:
+            raise ValueError("Could not find file with highest win rate.")
+
+        return MODEL_DIR+highest_win_rate_file, training_cases
+
+    def load_reinforcement_model(self, i):
+        reinforcement_model_files = []
+
+        path = REINFORCEMENT_MODEL_DIR
+
+        files_with_training_data = [f for f in listdir(path) if isfile(join(path, f))]
+
+        for file_name in files_with_training_data:
+            reinforcement_model_files.append(file_name)
+
+        reinforcement_model_files = sorted(reinforcement_model_files, key=lambda k: int(k.split("-")[2]))
+
+        if i > len(reinforcement_model_files)-1:
+            raise ValueError("Tried to load reinforcement models without saved models in " + REINFORCEMENT_MODEL_DIR)
+
+        self.model = tf.keras.models.load_model(path+reinforcement_model_files[i])
+        return int(reinforcement_model_files[i].split("-")[2])

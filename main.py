@@ -7,7 +7,7 @@ from GameSetting import *
 import copy
 from Policy import *
 import train_neural_net
-from definitions import MODEL_DIR
+from definitions import REINFORCEMENT_MODEL_DIR
 import os
 from hexclient.BasicClientActor import BasicClientActor as BSA
 import time
@@ -60,7 +60,7 @@ def tree_search(rootstate, itermax, verbose=False, policy=None, policies=None, s
                 #If our random number exceeds epsilon, we let the ANN pick move. If not, the move is random.
                 if random_num>game_setting.epsilon:
                     legal_moves = [state.convertCoordinateToInteger(move) for move in state.moves()]
-                    flattened_move = policies[state.toplay-1].select(state.convertFeatureVectorToFormat(rootstate.board.flatten('F'), rootstate.toplay),
+                    flattened_move = policies[state.toplay-1].select(state.convertFeatureVectorToFormat(rootstate.board.flatten('F')),
                                                      legal_moves)
                     assert (flattened_move in legal_moves)
                     state.play(state.convertIntegerToCoordinate(flattened_move))
@@ -74,11 +74,14 @@ def tree_search(rootstate, itermax, verbose=False, policy=None, policies=None, s
                 node.wins += 1
             node = node.parentNode
 
-    if game_setting.verbose == True:
+    if game_setting.verbose >= 2:
         print(rootnode.children_to_string())
 
+    feature_vector, target = get_feature_and_target(rootnode, rootstate, rootstate.toplay)
+    replay_buffer.append([feature_vector, target])
+
     if save_training:
-        append_result_to_training_data(rootnode, rootstate, rootstate.toplay, itermax, moves_are_random=moves_are_random)
+        append_result_to_training_data(feature_vector, target, itermax, moves_are_random=moves_are_random)
 
     if moves_are_random:
         return random.choice(rootnode.childNodes).move
@@ -86,39 +89,28 @@ def tree_search(rootstate, itermax, verbose=False, policy=None, policies=None, s
         return max(rootnode.childNodes, key=lambda c: c.visits).move
 
 
-def play_game(game_setting, policies=None, bad_mcts=False, bad_vs_good_neural_net=None, moves_are_random=False):
-    """
-    Spiller et enkelt spill mellom to spillere
-    """
-    #Bad mcts mode pits a strong mcts player versus a weak mcts player. The idea is make
-    #training data that teaches ANNs how to not only play vs strong players, but weak
-    #players too. Weak players make random moves in odd corners of the board that the
-    #ANN may respond erratically to.
+def play_game(game_setting, game_func, policies=None):
+    if policies[0] is not None and policies[0] is policies[1]:
+        reinforcement_learning = True
+        episodes_until_next_model_save = game_setting.G//(game_setting.K-1)
+    else:
+        reinforcement_learning = False
+
     player_wins = {"black": 0, "white": 0}
     for i in range(game_setting.G):
         playerdict = {1:"white", 2: "black"}
         game_setting.P = playerdict[i%2 + 1]
         state = HexState1(game_setting)
-        while (state.white_groups.connected(1,2) == False and state.black_groups.connected(1,2) == False):
-            if bad_mcts:
-                genius_player = random.randint(1,2)
-                if state.toplay == genius_player:
-                    move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose,
-                                       policies=None, save_training=True, moves_are_random=moves_are_random)
-                elif state.toplay == 3-genius_player:
-                    move = tree_search(rootstate=state, itermax=1, verbose=game_setting.verbose,
-                                       policies=None, save_training=False, moves_are_random=moves_are_random)
-            elif bad_vs_good_neural_net is not None:
-                #Bad neural net on first index, good neural net on second index
-                if state.toplay == 2:
-                    move = tree_search(rootstate=state, itermax=game_setting.M//2, verbose=game_setting.verbose,
-                                       policies=policies, save_training=True, moves_are_random=moves_are_random)
-                elif state.toplay == 1:
-                    move = tree_search(rootstate=state, itermax=game_setting.M//30, verbose=game_setting.verbose,
-                                       policies=policies, save_training=False, moves_are_random=moves_are_random)
-            else:
-                move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose,
-                                        moves_are_random = moves_are_random, policies=policies)
+
+        if reinforcement_learning:
+            episodes_until_next_model_save -= 1
+            if episodes_until_next_model_save == 0 or i==0:
+                file_name = str(game_setting.network_dimensions[0]) + "-NA-" + str(i) + "-" + str(int(time.time()))
+                policies[0].model.save(REINFORCEMENT_MODEL_DIR + file_name)
+                episodes_until_next_model_save = game_setting.G // (game_setting.K-1)
+
+        while state.winner() == 0:
+            move = game_func(state, policies)
             if state.toplay == 2:
                 state.place_black(move)
                 state.set_turn(1)
@@ -126,101 +118,164 @@ def play_game(game_setting, policies=None, bad_mcts=False, bad_vs_good_neural_ne
                 state.place_white(move)
                 state.set_turn(2)
 
-            if game_setting.verbose == True:
+            if game_setting.verbose >= 2:
                 print(state)
                 if state.toplay == 1:
                     print("Player 2 selects " + str(move) + "\n")
                 elif state.toplay == 2:
                     print("Player 1 selects " + str(move) + "\n")
                 #print("Player " + str(state.toplay) + " selects " + str(move))
-        if game_setting.verbose == True:
+        if game_setting.verbose >= 1:
+            if (i % 5) == 0:
+                print("We have played " + str(i) + " games. player_wins: " + str(player_wins))
+            print(state)
             if state.winner() == 2:
-                print("Player black wins" + "\n")
+                print("\nPlayer black wins")
             elif state.winner() == 1:
-                print("Player white wins" + "\n")
-
-        if (i%5) == 0:
-            print("We have played " + str(i) + " games. player_wins: " + str(player_wins))
-
-        print(state)
+                print("\nPlayer white wins")
 
         if state.winner() == 1:
             player_wins["white"] += 1
         elif state.winner() == 2:
             player_wins["black"] += 1
+
+        if reinforcement_learning:
+            random_rbuf = random.sample(replay_buffer, random.randint(1, len(replay_buffer)-1))
+            for case in random_rbuf:
+                feature_vector = np.array([np.array(case[0])])
+                target_vector = np.array([np.array(case[1])])
+                policies[0].model.fit(feature_vector, target_vector)
+            if game_setting.verbose >= 2:
+                policies[0].model.summary()
+
+        del replay_buffer[:]
+
     print(player_wins)
 
 
-
-def append_result_to_training_data(rootnode, rootstate, toplay, itermax,moves_are_random=False):
+def get_feature_and_target(rootnode, rootstate, toplay):
     target = [0] * game_setting.nr_of_legal_moves
 
-    #if toplay == 2:
-        #print("debug")
-
     for child_node in rootnode.childNodes:
-        move = child_node.move[1]*game_setting.size+child_node.move[0]
-        target[move] = child_node.visits/rootnode.visits
+        move = child_node.move[1] * game_setting.size + child_node.move[0]
+        target[move] = child_node.visits / rootnode.visits
 
     feature_vector = convertFeatureVectorToFormat(rootstate.board.flatten('F'), toplay)
-    #print(",".join(str(int(input)) for input in feature_vector)+"|"+",".join(str(target) for target in target)+"|"+str(itermax)+"\n")
+
+    return feature_vector, target
+
+def append_result_to_training_data(feature_vector, target, itermax,moves_are_random=False):
     if moves_are_random:
         training_data_file.write(",".join(str(int(input)) for input in feature_vector) + "|" + ",".join(
             str(target) for target in target) + "|" + str(itermax) + "|" + "random move\n")
     else:
         training_data_file.write(",".join(str(int(input)) for input in feature_vector)+"|"+",".join(str(target) for target in target)+"|"+str(itermax)+"\n")
 
+
+def bad_mcts(state, policies):
+    moves_are_random = False
+
+    genius_player = random.randint(1, 2)
+    if state.toplay == genius_player:
+        move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose,
+                           policies=None, save_training=True, moves_are_random=moves_are_random)
+    elif state.toplay == 3 - genius_player:
+        move = tree_search(rootstate=state, itermax=1, verbose=game_setting.verbose,
+                           policies=None, save_training=False, moves_are_random=moves_are_random)
+
+    return move
+
+def random_mcts(state, policies):
+    moves_are_random = True
+
+    return tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose,
+                       moves_are_random=moves_are_random, policies=None)
+
+def pure_mcts(state, policies):
+    moves_are_random = False
+
+    return tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose,
+                moves_are_random=moves_are_random, policies=None)
+
+def neural_net_vs_neural_net(state, policies):
+    moves_are_random = False
+
+    if state.toplay == 2:
+        move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose,
+                           policies=policies, save_training=True, moves_are_random=moves_are_random)
+    elif state.toplay == 1:
+        move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose,
+                           policies=policies, save_training=False, moves_are_random=moves_are_random)
+
+    return move
+
+def train_neural_net_by_reinforcement(state, policies):
+    moves_are_random = False
+
+    move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose,
+                       moves_are_random=moves_are_random, policies=policies, save_training=False)
+
+def play_bad_mcts():
+    print("Bad vs good MCTS")
+    #Bad mcts mode pits a strong mcts player versus a weak mcts player. The idea is make
+    #training data that teaches ANNs how to not only play vs strong players, but weak
+    #players too. Weak players make random moves in odd corners of the board that the
+    #ANN may respond erratically to.
+    policies = [None, None]
+    play_game(game_setting, bad_mcts, policies=policies)
+
+def play_random_mcts():
+    print("Random move MCTS")
+    #Random MCTS mode makes all moves be random, but each board position is rigorously
+    #evaluated by MCTS with plenty of simulations.
+    policies = [None, None]
+    play_game(game_setting, random_mcts, policies=policies )
+
+def play_pure_mcts():
+    print("Vanilla MCTS")
+    # Pure MCTS pits two strong MCTS players against each other.
+    policies = [None, None]
+    play_game(game_setting, pure_mcts, policies=policies)
+
+
+def play_good_vs_bad_neural_net():
+    print("good vs bad neural net")
+    policies = [Policy(game_setting), Policy(game_setting)]
+    policies[0].import_data_and_train(25)  # Training ANN with a maximum of 25 cases
+    policies[1].import_data_and_train()  # Training ANN with all available training data
+    play_game(game_setting, neural_net_vs_neural_net, policies=policies)
+
+def play_good_vs_good_neural_net():
+    print("Good vs good neural net")
+    policies = [Policy(game_setting), Policy(game_setting)]
+    policies[0].import_data_and_train()  # Training ANN with all available training data
+    policies[1].import_data_and_train()  # Training ANN with all available training data
+    play_game(game_setting, neural_net_vs_neural_net, policies=policies)
+
+def play_reinforcement_neural_net():
+    print("Reinforcement learning")
+    policy = Policy(game_setting)
+    policies = [policy, policy]
+    play_game(game_setting, neural_net_vs_neural_net, policies=policies)
+
+
 start_time = time.time() #We start counting the time.
 
 game_setting = GameSetting() #Load the game settings.
 
+replay_buffer = []
+
 file_path = training_data_file_path = DATA_DIR+'n'.join(str(dim) for dim in game_setting.network_dimensions)+"-"+str(time.time()+datetime.now().microsecond)+"-"+''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
 training_data_file = open(file_path, "w+")
 
-print("Vanilla MCTS")
-play_game(game_setting) #First, we play a vanilla MCTS game
+#play_bad_mcts()
+#play_random_mcts()
+#play_pure_mcts()
+#play_good_vs_bad_neural_net()
+#play_good_vs_good_neural_net()
+play_reinforcement_neural_net()
 
-print("Random move MCTS")
-play_game(game_setting, moves_are_random=True) #We let the moves be random, but each position is
-                        # evaluated accurately by the MCTS algorithm and saved for training.
-
-print("Bad vs good MCTS")
-play_game(game_setting, bad_mcts=True) #We play one bad vs one good mcts against each other, only saving the good data
-
-"""
-policies = [Policy(game_setting), Policy(game_setting)]
-policies[0].import_data_and_train(25) #Training ANN with a maximum of 25 cases
-policies[1].import_data_and_train() #Training ANN with all available training data
-print("bad vs good ANN"), play_game(game_setting, policies, bad_vs_good_neural_net=True)
-
-
-policies = [Policy(game_setting), Policy(game_setting)]
-                                    #Note that the 0st neural net receives no training at all
-policies[1].import_data_and_train() #Training ANN with all available training data
-print("completely untrained ANN vs good ANN"), play_game(game_setting, policies, bad_vs_good_neural_net=True)
-
-
-policies = [Policy(game_setting), Policy(game_setting)]
-for policy in policies:
-    policy.import_data_and_train()
-print("good vs good ANN"), play_game(game_setting, policies=policies) #We play two ANNs against each other, saving the training data.
-"""
 
 training_data_file.close() #Wrapping up the training data file.
-#client = BSA()
-#client = BSA.BasicClientActor.connect_to_server()
-#print("yolo")
-#client.connect()
-#print("yolo")
-#client.connect_to_server()
-
-#client = BSA()
-#client.connect_to_server()
-
-M = tf.keras.models.load_model(ROOT_DIR + "model")
-#model.compile(loss='mean_squared_error',
-#            optimizer='Adam',
-#            metrics=['accuracy'])
-
 
 print("--- %s seconds ---" % (time.time() - start_time)) #How much time did we use?

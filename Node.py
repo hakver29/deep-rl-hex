@@ -13,7 +13,7 @@ class Node1:
         self.wins = 0
         self.visits = 0
         self.untried_moves = state.moves()  # child nodes
-        self.toplay = state.turn()
+        self.toplay = state.toplay
 
     def select_child(self):
         """
