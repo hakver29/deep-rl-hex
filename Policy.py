@@ -122,12 +122,15 @@ tf.keras.initializers.Ones())) #Add input layer
 
         return features, targets
 
-    def train(self, feature_vectors, targets, max_cases, batch_size=10):
+    def train(self, feature_vectors, targets, max_cases, batch_size=10, test_nr_of_cases=False):
         assert (len(feature_vectors) == len(targets))
         feature_vectors = np.array([np.array(feature_vector) for feature_vector in feature_vectors])
         targets = np.array([np.array(target) for target in targets])
 
         nr_of_cases = min(max_cases, int((self.game_setting.case_fraction*len(feature_vectors))))
+        if test_nr_of_cases:
+            return nr_of_cases
+
         indexes = np.random.choice(feature_vectors.shape[0], nr_of_cases, replace=False)
 
         feature_vectors = feature_vectors[indexes, :]
@@ -141,9 +144,9 @@ tf.keras.initializers.Ones())) #Add input layer
         #self.model.save("model")
         return nr_of_cases
 
-    def import_data_and_train(self, max_cases=sys.maxsize, training_file=None):
+    def import_data_and_train(self, max_cases=sys.maxsize, training_file=None, test_nr_of_cases=False):
         features, targets = self.read_all_training_data(training_file=None)
-        return self.train(features, targets, max_cases)
+        return self.train(features, targets, max_cases, test_nr_of_cases=test_nr_of_cases)
 
     def load_best_model(self):
 
@@ -159,7 +162,7 @@ tf.keras.initializers.Ones())) #Add input layer
         path = MODEL_DIR
         files_with_training_data = [f for f in listdir(path) if isfile(join(path, f))]
         for file_name in files_with_training_data:
-            input_size = int(file_name.split("-")[0])
+            input_size = int(file_name.split("-")[0].split('n')[0])
             if input_size == self.game_setting.nr_of_legal_moves+1:
                 files_with_correct_dimensions.append(file_name)
 
@@ -195,4 +198,4 @@ tf.keras.initializers.Ones())) #Add input layer
             raise ValueError("Tried to load reinforcement models without saved models in " + REINFORCEMENT_MODEL_DIR)
 
         self.model = tf.keras.models.load_model(path+reinforcement_model_files[i])
-        return int(reinforcement_model_files[i].split("-")[2])
+        return reinforcement_model_files[i]

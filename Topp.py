@@ -23,8 +23,8 @@ class Topp:
         if load_reinforcement:
             for i in range(0, game_setting.K):
                 policy = Policy(self.game_setting)
-                nr_of_episodes = policy.load_reinforcement_model(i)
-                self.policies.append([policy, nr_of_episodes, 0, 0])
+                file_name = policy.load_reinforcement_model(i)
+                self.policies.append([policy, file_name, 0, 0])
             return
 
         if load_best_policy:
@@ -36,7 +36,7 @@ class Topp:
             start = 0
         policy = Policy(self.game_setting)
 
-        max_cases = min(policy.import_data_and_train(max_cases=self.max_cases), self.max_cases)
+        max_cases = min(policy.import_data_and_train(max_cases=self.max_cases, test_nr_of_cases=True), self.max_cases)
 
         if self.negative_training_power > 0:
             for i in range(start,self.K):
@@ -72,7 +72,7 @@ class Topp:
                         self.policies[i][3] += 1
 
         if self.game_setting.load_reinforcement:
-            t = PrettyTable(['Theoretical rank', "Number of training episodes", 'Wins', 'Losses', '% Win'])
+            t = PrettyTable(['Theoretical rank', "File name", 'Wins', 'Losses', '% Win'])
             for i in range(self.K-1, -1, -1):
                 training_cases = self.policies[i][1]
                 wins = self.policies[i][2]
@@ -93,7 +93,7 @@ class Topp:
         if self.most_trained_neural_net_has_most_wins() and self.game_setting.load_best_policy is False and self.game_setting.load_reinforcement is False:
             win_rate = (round(self.policies[0][2]/(self.policies[0][2]+self.policies[0][3]), 2))*100
             training_cases = self.policies[0][1]
-            file_name = str(self.game_setting.network_dimensions[0])+"-"+str(win_rate)[0:4]+"-"+str(training_cases)+"-"+str(int(time.time()))
+            file_name = 'n'.join(str(dim) for dim in game_setting.network_dimensions)+"-"+str(win_rate)[0:4]+"-"+str(training_cases)+"-"+str(self.game_setting.learning_rate)+"-"+str(self.game_setting.topp_epochs)+"-"+str(int(time.time()))
             self.policies[0][0].model.save(MODEL_DIR+file_name)
             print("Model was saved.")
 

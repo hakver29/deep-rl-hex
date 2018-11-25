@@ -274,10 +274,10 @@ training_data_file = open(file_path, "w+")
 
 #play_bad_mcts()
 #play_random_mcts()
-#play_pure_mcts()
+play_pure_mcts()
 #play_good_vs_bad_neural_net()
 #play_good_vs_good_neural_net()
-play_reinforcement_neural_net()
+#play_reinforcement_neural_net()
 
 
 training_data_file.close() #Wrapping up the training data file.
