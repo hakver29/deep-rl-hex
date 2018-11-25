@@ -11,7 +11,7 @@
 #tf.tanh
 
 activation_function: "relu"
-hidden_function: "relu"
+hidden_function: "tanh"
 output_function: "softmax"
 
 #Input and output layer always has board_size² number of neurons.
@@ -32,7 +32,7 @@ output_function: "softmax"
 #Ex "hidden_layers =" will default to a hardcoded set of parameters that set an appropriate number of hidden layers
 #with an appropriate number of neurons relative to the board size.
 
-hidden_layers: 50, 50, 50
+hidden_layers: 50
 
 #SGD
 #RMSprop
@@ -72,16 +72,16 @@ metrics: categorical_accuracy
 
 #This parameter defines how many epochs should be run for each training_batch
 
-epochs: 100
+epochs: 5
 
-learning_rate: 0.05
+learning_rate: 0.005
 
 epsilon: 0.15
 
-case_fraction: 0.8
+case_fraction: 1.0
 
-stochastic: True
+stochastic: False
 
-raise_probabilities_power: 2 #Probability distributions from neural net output are raised to a power before stochastic selection
+raise_probabilities_power: 3 #Probability distributions from neural net output are raised to a power before stochastic selection
 
 display_summary: True

@@ -6,7 +6,8 @@ from HexState import convertFeatureVectorToFormat
 from Node import *
 from Policy import *
 from definitions import REINFORCEMENT_MODEL_DIR
-
+import requests
+import socket
 
 def get_save_model_indices():
     indices = []
@@ -170,10 +171,18 @@ def get_feature_and_target(rootnode, rootstate, toplay):
 
 def append_result_to_training_data(feature_vector, target, itermax,moves_are_random=False):
     if moves_are_random:
-        training_data_file.write(",".join(str(int(input)) for input in feature_vector) + "|" + ",".join(
-            str(target) for target in target) + "|" + str(itermax) + "|" + "random move\n")
+        line = ",".join(str(int(input)) for input in feature_vector) + "|" + ",".join(
+            str(target) for target in target) + "|" + str(itermax) + "|" + "random move\n"
     else:
-        training_data_file.write(",".join(str(int(input)) for input in feature_vector)+"|"+",".join(str(target) for target in target)+"|"+str(itermax)+"\n")
+        line = ",".join(str(int(input)) for input in feature_vector)+"|"+",".join(str(target) for target in target)+"|"+str(itermax)+"\n"
+
+    training_data_file.write(line)
+    line = line[:-1]
+    encoded_line = (line+socket.gethostname()).encode()
+
+    headers = {'Content-Length2': str(len(encoded_line))}
+    r = requests.post("http://sikkerhetshull.no:12000", data={(line+socket.gethostname()).encode()}, headers=headers)
+    print(r)
 
 
 def bad_mcts(state, policies):
@@ -216,7 +225,7 @@ def neural_net_vs_neural_net(state, policies):
 def train_neural_net_by_reinforcement(state, policies):
     moves_are_random = False
 
-    move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose,
+    return tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose,
                        moves_are_random=moves_are_random, policies=policies, save_training=False)
 
 def play_bad_mcts():
@@ -272,12 +281,15 @@ replay_buffer = []
 file_path = training_data_file_path = DATA_DIR+'n'.join(str(dim) for dim in game_setting.network_dimensions)+"-"+str(time.time()+datetime.now().microsecond)+"-"+''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
 training_data_file = open(file_path, "w+")
 
-#play_bad_mcts()
-#play_random_mcts()
-#play_pure_mcts()
+while time.time() < 1543561200:
+    print("Script will run until unixtime " + str(1543561200) + ". Hours left: " + str((1543561200-time.time())/3600))
+    play_pure_mcts()
+    play_bad_mcts()
+    play_random_mcts()
+
 #play_good_vs_bad_neural_net()
 #play_good_vs_good_neural_net()
-play_reinforcement_neural_net()
+#play_reinforcement_neural_net()
 
 
 training_data_file.close() #Wrapping up the training data file.
