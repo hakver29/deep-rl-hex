@@ -14,25 +14,28 @@ from definitions import DATA_DIR, MODEL_DIR, ROOT_DIR, REINFORCEMENT_MODEL_DIR
 
 class Policy:
 
-    def __init__(self, game_setting):
+    def __init__(self, game_setting, no_model=False):
         self.game_setting = game_setting
         dims = [str(int) for int in game_setting.network_dimensions]
         afunc = eval("tf.nn." + game_setting.activation_function)
         hfunc = eval("tf.nn." + game_setting.hidden_function)
         ofunc = eval("tf.nn." + game_setting.output_function)
 
-        self.model = tf.keras.models.Sequential() #Defining feed-forward neural net
-        self.model.add(tf.keras.layers.Dense(dims[0], input_shape=(dims[0],), activation=afunc, kernel_initializer=
-tf.keras.initializers.Ones())) #Add input layer
-        for i in range(1,len(dims)-1):
-            self.model.add(tf.keras.layers.Dense(dims[i], activation=hfunc)) #add hidden layers
-        self.model.add(tf.keras.layers.Dense(dims[len(dims)-1], activation=ofunc)) #add output layer
+        if no_model:
+            self.model = None
+        else:
+            self.model = tf.keras.models.Sequential() #Defining feed-forward neural net
+            self.model.add(tf.keras.layers.Dense(dims[0], input_shape=(dims[0],), activation=afunc, kernel_initializer=
+    tf.keras.initializers.Ones())) #Add input layer
+            for i in range(1,len(dims)-1):
+                self.model.add(tf.keras.layers.Dense(dims[i], activation=hfunc)) #add hidden layers
+            self.model.add(tf.keras.layers.Dense(dims[len(dims)-1], activation=ofunc)) #add output layer
 
-        #self.model.add(tf.keras.layers.Dense(
+            #self.model.add(tf.keras.layers.Dense(
 
-        optimizer = eval("tf.keras.optimizers."+game_setting.optimizer+"(lr="+str(game_setting.learning_rate)+")")
+            optimizer = eval("tf.keras.optimizers."+game_setting.optimizer+"(lr="+str(game_setting.learning_rate)+")")
 
-        self.model.compile(optimizer=optimizer, loss=game_setting.loss_function, metrics=[game_setting.metrics])
+            self.model.compile(optimizer=optimizer, loss=game_setting.loss_function, metrics=[game_setting.metrics])
 
     def scale_probabilities(self, vector, power):
         for i in range(0, len(vector)):
@@ -64,6 +67,8 @@ tf.keras.initializers.Ones())) #Add input layer
         return random.choice(legal_moves)
 
     def select(self, feature_vector, legal_moves):
+        if self.model == None:
+            return random.choice(legal_moves)
         feature_vector = np.array(feature_vector)
         loopend = feature_vector.shape[0]-1
         feature_vector = np.expand_dims(feature_vector, 0)

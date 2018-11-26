@@ -40,11 +40,15 @@ class Topp:
 
         if self.negative_training_power > 0:
             for i in range(start,self.K):
-                policy = Policy(self.game_setting)
+                nr_of_cases = max(0, max_cases // ((i + 1) ** self.negative_training_power))
 
-                nr_of_cases = max(1, max_cases//((i+1)**self.negative_training_power))
+                if nr_of_cases > 0:
+                    policy = Policy(self.game_setting)
+                    actual_nr_of_cases = policy.import_data_and_train(max_cases=nr_of_cases)
+                else:
+                    policy = Policy(self.game_setting, no_model=True)
+                    actual_nr_of_cases = 0
 
-                actual_nr_of_cases = policy.import_data_and_train(max_cases=nr_of_cases)
                 self.policies.append([policy, actual_nr_of_cases, 0,0])
         else:
             for i in range(start, self.K):

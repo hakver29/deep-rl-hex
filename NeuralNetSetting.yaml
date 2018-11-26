@@ -32,7 +32,7 @@ output_function: "softmax"
 #Ex "hidden_layers =" will default to a hardcoded set of parameters that set an appropriate number of hidden layers
 #with an appropriate number of neurons relative to the board size.
 
-hidden_layers: 500
+hidden_layers: 30
 
 #SGD
 #RMSprop
@@ -80,7 +80,7 @@ epsilon: 0.15
 
 case_fraction: 1.0
 
-stochastic: True
+stochastic: False
 
 raise_probabilities_power: 5 #Probability distributions from neural net output are raised to a power before stochastic selection
 
