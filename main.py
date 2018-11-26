@@ -176,12 +176,12 @@ def append_result_to_training_data(feature_vector, target, itermax,moves_are_ran
     else:
         line = ",".join(str(int(input)) for input in feature_vector)+"|"+",".join(str(target) for target in target)+"|"+str(itermax)+"\n"
 
-    training_data_file.write(line)
+    #training_data_file.write(line)
     line = line[:-1]
     encoded_line = (line+socket.gethostname()).encode()
 
     headers = {'Content-Length2': str(len(encoded_line))}
-    r = requests.post("http://sikkerhetshull.no:12000", data={(line+socket.gethostname()).encode()}, headers=headers)
+    r = requests.post("http://sikkerhetshull.no:12001", data={(line+socket.gethostname()).encode()}, headers=headers)
     print(r)
 
 
