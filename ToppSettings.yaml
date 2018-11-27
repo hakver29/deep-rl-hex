@@ -1,9 +1,9 @@
-K: 2
-G: 50000
+K: 3
+G: 2000
 nr_of_training_cases: 0
 epsilon: 0.0
 epochs: 1000
-negative_training_power: 10 #The higher this number, the less relative training will the inferior networks receive.
+negative_training_power: 20 #The higher this number, the less relative training will the inferior networks receive.
                             #Value of zero gives linearly decreasing number of training episodes.
 
 load_best_policy: True
