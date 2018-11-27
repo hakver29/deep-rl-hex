@@ -19,6 +19,8 @@ def get_save_model_indices():
 
 def tree_search(rootstate, itermax, verbose=False, policy=None, policies=None, save_training=True, moves_are_random=False):
     rootnode = Node1(state=rootstate)
+    if game_setting.verbose >= 1:
+        print("Starting " + str(itermax) + " rollouts.")
     for i in range(itermax):
         node = rootnode
         state = copy.deepcopy(rootstate)
@@ -185,12 +187,27 @@ def append_result_to_training_data(feature_vector, target, itermax,moves_are_ran
     print(r)
 
 
+def calculate_itermax(state):
+    remaining_moves = len(state.moves())
+    if remaining_moves < 10:
+        return 2000
+    if remaining_moves < 17:
+        return 10000
+    if remaining_moves < 26:
+        return 20000
+    if remaining_moves < 37:
+        return 100000
+    return game_setting.M
+
+
+
 def bad_mcts(state, policies):
     moves_are_random = False
 
     genius_player = random.randint(1, 2)
     if state.toplay == genius_player:
-        move = tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose,
+        itermax = calculate_itermax(state)
+        move = tree_search(rootstate=state, itermax=itermax, verbose=game_setting.verbose,
                            policies=None, save_training=True, moves_are_random=moves_are_random)
     elif state.toplay == 3 - genius_player:
         move = tree_search(rootstate=state, itermax=1, verbose=game_setting.verbose,
@@ -200,14 +217,14 @@ def bad_mcts(state, policies):
 
 def random_mcts(state, policies):
     moves_are_random = True
-
-    return tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose,
+    itermax = calculate_itermax(state)
+    return tree_search(rootstate=state, itermax=itermax, verbose=game_setting.verbose,
                        moves_are_random=moves_are_random, policies=None)
 
 def pure_mcts(state, policies):
     moves_are_random = False
-
-    return tree_search(rootstate=state, itermax=game_setting.M, verbose=game_setting.verbose,
+    itermax = calculate_itermax(state)
+    return tree_search(rootstate=state, itermax=itermax, verbose=game_setting.verbose,
                 moves_are_random=moves_are_random, policies=None)
 
 def neural_net_vs_neural_net(state, policies):
