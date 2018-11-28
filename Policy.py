@@ -6,6 +6,8 @@ from os.path import isfile, join
 import time
 import sys
 import warnings
+from HexState import convertIntegerToCoordinate
+from math import sqrt
 
 from GameSetting import GameSetting
 from definitions import DATA_DIR, MODEL_DIR, ROOT_DIR, REINFORCEMENT_MODEL_DIR
@@ -76,6 +78,7 @@ class Policy:
         printable_vector = [(i) for i in probability_of_moves[0]]
         if self.game_setting.verbose >= 3:
             print(printable_vector)
+            print("Largest probability was move " + str(convertIntegerToCoordinate(probability_of_moves.argmax(), int(sqrt(probability_of_moves.shape[1])))) + " with probability " + str(probability_of_moves.max()))
         for i in range(0,loopend):
             if i not in legal_moves:
                 probability_of_moves[0,i] = 0.0 #Removing all non-legal moves from neural net prediction

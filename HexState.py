@@ -160,3 +160,9 @@ def convertFeatureVectorToFormat(feature_vector, toplay):
     feature_vector.insert(0,toplay)
     feature_vector = np.array(feature_vector)
     return feature_vector
+
+def convertIntegerToCoordinate(intMove, board_dim):
+    # Hjelpefunksjon
+    ycoordinate = intMove // board_dim
+    xcoordinate = intMove % board_dim
+    return xcoordinate, ycoordinate
