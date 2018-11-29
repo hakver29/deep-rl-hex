@@ -298,7 +298,7 @@ replay_buffer = []
 file_path = training_data_file_path = DATA_DIR+'n'.join(str(dim) for dim in game_setting.network_dimensions)+"-"+str(time.time()+datetime.now().microsecond)+"-"+''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
 training_data_file = open(file_path, "w+")
 
-time_end = 1543478400
+time_end = 1543532400
 
 while time.time() < time_end:
     print("Script will run until unixtime " + str(time_end) + ". Hours left: " + str((time_end-time.time())/3600))
